@@ -1229,69 +1229,69 @@ function App() {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className={`fixed inset-y-0 right-0 w-96 ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'} shadow-2xl z-50 overflow-y-auto`}
+            className={`fixed inset-y-0 right-0 w-80 max-w-sm ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'} shadow-2xl z-50 overflow-y-auto`}
           >
-            <div className="p-6">
+            <div className="p-4">
               <div className="flex items-center justify-between mb-6">
-                <h2 className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-xl font-bold`}>
+                <h2 className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-lg font-bold`}>
                   Panel de Administración
                 </h2>
                 <button
                   onClick={() => setShowAdminPanel(false)}
                   className={`${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition`}
                 >
-                  <X size={24} />
+                  <X size={20} />
                 </button>
               </div>
 
-              <div className="space-y-6">
+              <div className="space-y-4">
                 <div>
-                  <h3 className="text-[#C5A95E] font-semibold mb-3">Personalización de Marca</h3>
-                  <div className="space-y-3">
+                  <h3 className="text-[#C5A95E] font-semibold mb-2 text-sm">Personalización de Marca</h3>
+                  <div className="space-y-2">
                     <div>
-                      <label className={`block ${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-sm mb-1`}>
+                      <label className={`block ${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-xs mb-1`}>
                         URL del Logo
                       </label>
                       <input
-                        type="url"
-                        value={customization.logo}
-                        onChange={(e) => saveCustomization({...customization, logo: e.target.value})}
-                        className={`w-full p-2 ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded border focus:border-[#C5A95E] focus:outline-none text-sm transition-colors`}
+                        type="text"
+                        defaultValue={customization.logo}
+                        onBlur={(e) => saveCustomization({...customization, logo: e.target.value})}
+                        className={`w-full p-2 text-xs ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded border focus:border-[#C5A95E] focus:outline-none transition-colors`}
                         placeholder="https://ejemplo.com/logo.png"
                       />
                     </div>
                     <div>
-                      <label className={`block ${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-sm mb-1`}>
+                      <label className={`block ${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-xs mb-1`}>
                         Nombre de la Empresa
                       </label>
                       <input
                         type="text"
-                        value={customization.companyName}
-                        onChange={(e) => saveCustomization({...customization, companyName: e.target.value})}
-                        className={`w-full p-2 ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded border focus:border-[#C5A95E] focus:outline-none text-sm transition-colors`}
+                        defaultValue={customization.companyName}
+                        onBlur={(e) => saveCustomization({...customization, companyName: e.target.value})}
+                        className={`w-full p-2 text-xs ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded border focus:border-[#C5A95E] focus:outline-none transition-colors`}
                       />
                     </div>
                     <div>
-                      <label className={`block ${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-sm mb-1`}>
+                      <label className={`block ${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-xs mb-1`}>
                         URL de Fondo de Login
                       </label>
                       <input
-                        type="url"
-                        value={customization.loginBackground}
-                        onChange={(e) => saveCustomization({...customization, loginBackground: e.target.value})}
-                        className={`w-full p-2 ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded border focus:border-[#C5A95E] focus:outline-none text-sm transition-colors`}
+                        type="text"
+                        defaultValue={customization.loginBackground}
+                        onBlur={(e) => saveCustomization({...customization, loginBackground: e.target.value})}
+                        className={`w-full p-2 text-xs ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded border focus:border-[#C5A95E] focus:outline-none transition-colors`}
                         placeholder="https://ejemplo.com/imagen.jpg"
                       />
                     </div>
                     <div>
-                      <label className={`block ${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-sm mb-1`}>
+                      <label className={`block ${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-xs mb-1`}>
                         URL de Banner Principal
                       </label>
                       <input
-                        type="url"
-                        value={customization.heroBanner}
-                        onChange={(e) => saveCustomization({...customization, heroBanner: e.target.value})}
-                        className={`w-full p-2 ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded border focus:border-[#C5A95E] focus:outline-none text-sm transition-colors`}
+                        type="text"
+                        defaultValue={customization.heroBanner}
+                        onBlur={(e) => saveCustomization({...customization, heroBanner: e.target.value})}
+                        className={`w-full p-2 text-xs ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded border focus:border-[#C5A95E] focus:outline-none transition-colors`}
                         placeholder="https://ejemplo.com/banner.jpg"
                       />
                     </div>
@@ -1299,26 +1299,27 @@ function App() {
                 </div>
 
                 <div>
-                  <h3 className="text-[#C5A95E] font-semibold mb-3">Gestión de Usuarios</h3>
+                  <h3 className="text-[#C5A95E] font-semibold mb-2 text-sm">Gestión de Usuarios</h3>
                   <button 
                     onClick={() => setShowUserManagement(true)}
-                    className="w-full bg-blue-600 text-white py-2 rounded font-semibold hover:bg-blue-700 flex items-center justify-center space-x-2 transition mb-3"
+                    className="w-full bg-blue-600 text-white py-2 rounded font-semibold hover:bg-blue-700 flex items-center justify-center space-x-2 transition text-sm"
                   >
-                    <Users size={16} />
+                    <Users size={14} />
                     <span>Gestionar Usuarios</span>
                   </button>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                  <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
                     Total de usuarios: {users.length}
                   </div>
                 </div>
 
                 <div>
-                  <h3 className="text-[#C5A95E] font-semibold mb-3">Gestión de Categorías</h3>
-                  <div className="space-y-2 max-h-40 overflow-y-auto">
+                  <h3 className="text-[#C5A95E] font-semibold mb-2 text-sm">Gestión de Categorías</h3>
+                  <div className="space-y-1 max-h-32 overflow-y-auto">
                     {categories.map((category) => (
-                      <div key={category.id} className={`flex items-center justify-between ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'} p-2 rounded`}>
-                        <span className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-sm`}>
-                          {category.name}
+                      <div key={category.id} className={`flex items-center justify-between ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'} p-2 rounded text-xs`}>
+                        <span className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} flex items-center space-x-2`}>
+                          <category.icon size={12} />
+                          <span>{category.name}</span>
                         </span>
                         <div className="flex space-x-1">
                           <motion.button 
@@ -1327,7 +1328,7 @@ function App() {
                             className={`${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} p-1 rounded hover:bg-gray-700 dark:hover:bg-gray-600 transition`}
                             title="Editar categoría"
                           >
-                            <Edit size={14} />
+                            <Edit size={10} />
                           </motion.button>
                           <motion.button 
                             whileHover={{ scale: 1.1 }}
@@ -1335,7 +1336,7 @@ function App() {
                             className={`${theme === 'dark' ? 'text-gray-400 hover:text-red-400' : 'text-gray-600 hover:text-red-600'} p-1 rounded hover:bg-gray-700 dark:hover:bg-gray-600 transition`}
                             title="Eliminar categoría"
                           >
-                            <Trash2 size={14} />
+                            <Trash2 size={10} />
                           </motion.button>
                         </div>
                       </div>
@@ -1344,19 +1345,19 @@ function App() {
                 </div>
 
                 <div>
-                  <h3 className="text-[#C5A95E] font-semibold mb-3">Gestión de Contenido</h3>
+                  <h3 className="text-[#C5A95E] font-semibold mb-2 text-sm">Gestión de Contenido</h3>
                   <motion.button 
                     onClick={() => setShowVideoUpload(true)}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className="w-full bg-[#C5A95E] text-black py-2 rounded font-semibold hover:bg-[#B8A055] flex items-center justify-center space-x-2 transition"
+                    className="w-full bg-[#C5A95E] text-black py-2 rounded font-semibold hover:bg-[#B8A055] flex items-center justify-center space-x-2 transition text-sm"
                   >
-                    <Upload size={16} />
+                    <Upload size={14} />
                     <span>Subir Nuevo Video</span>
                   </motion.button>
                 </div>
 
-                <div className={`pt-4 border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+                <div className={`pt-3 border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
                   <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} text-xs text-center`}>
                     Panel de Administración - v2.0
                   </p>
