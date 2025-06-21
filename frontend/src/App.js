@@ -395,12 +395,16 @@ function App() {
             className="relative w-full max-w-4xl mx-4"
             onClick={(e) => e.stopPropagation()}
           >
-            <button
-              onClick={closeModals}
-              className="absolute -top-10 right-0 text-white hover:text-[#C5A95E] z-10"
-            >
-              <X size={32} />
-            </button>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-white text-lg font-semibold">{selectedVideo.title}</h2>
+              <button
+                onClick={closeModals}
+                className="text-white hover:text-[#C5A95E] bg-gray-800 bg-opacity-80 rounded-full p-2 transition"
+                title="Cerrar"
+              >
+                <X size={24} />
+              </button>
+            </div>
             <div className="aspect-video bg-black rounded-lg overflow-hidden">
               <iframe
                 src={`https://www.youtube.com/embed/${selectedVideo.youtubeId}?autoplay=1`}
@@ -411,8 +415,11 @@ function App() {
               ></iframe>
             </div>
             <div className="bg-gray-900 p-6 rounded-b-lg">
-              <h2 className="text-white text-2xl font-bold mb-2">{selectedVideo.title}</h2>
               <p className="text-gray-300">{selectedVideo.description}</p>
+              <div className="flex items-center justify-between mt-4 text-sm text-gray-400">
+                <span className="text-[#C5A95E] font-semibold">{selectedVideo.match} Coincidencia</span>
+                <span>{selectedVideo.duration}</span>
+              </div>
             </div>
           </motion.div>
         </motion.div>
