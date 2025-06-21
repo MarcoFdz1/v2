@@ -673,6 +673,7 @@ function App() {
   const LoginComponent = () => {
     const [localEmail, setLocalEmail] = useState('');
     const [localPassword, setLocalPassword] = useState('');
+    const [localShowPassword, setLocalShowPassword] = useState(false);
 
     const handleSubmit = (e) => {
       e.preventDefault();
@@ -750,7 +751,7 @@ function App() {
               </label>
               <div className="relative">
                 <input
-                  type={showPassword ? "text" : "password"}
+                  type={localShowPassword ? "text" : "password"}
                   value={localPassword}
                   onChange={(e) => setLocalPassword(e.target.value)}
                   className={`w-full p-3 pr-10 ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded-md border focus:border-[#C5A95E] focus:outline-none transition-colors`}
@@ -760,10 +761,10 @@ function App() {
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={() => setLocalShowPassword(!localShowPassword)}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  {localShowPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
               </div>
             </div>
