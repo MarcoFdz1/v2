@@ -1714,6 +1714,7 @@ function App() {
         default:
           return (
             <>
+              <>
               {/* Hero Section */}
               <motion.section 
                 initial={{ opacity: 0 }}
@@ -1759,47 +1760,39 @@ function App() {
                 </div>
               </motion.section>
 
-              {/* Search and Filter Section */}
-              <div className="container mx-auto px-4 py-8">
-                <SearchAndFilter />
-              </div>
-
               {/* Content Sections */}
-              <div className="container mx-auto px-4 pb-12 space-y-12">
-                {Object.entries(groupedVideos).map(([sectionName, videos], sectionIndex) => (
+              <div className="container mx-auto px-4 py-12 space-y-12">
+                {categories.map((category, sectionIndex) => (
                   <motion.section
-                    key={sectionName}
+                    key={category.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: sectionIndex * 0.1 }}
                   >
                     <div className="flex items-center space-x-3 mb-6">
-                      {sectionName !== 'Resultados de Búsqueda' && (
-                        <motion.div
-                          whileHover={{ rotate: 15 }}
-                          className="text-[#C5A95E]"
-                        >
-                          {categories.find(cat => cat.name === sectionName)?.icon && 
-                            React.createElement(categories.find(cat => cat.name === sectionName).icon, { size: 28 })}
-                        </motion.div>
-                      )}
+                      <motion.div
+                        whileHover={{ rotate: 15 }}
+                        className="text-[#C5A95E]"
+                      >
+                        <category.icon size={28} />
+                      </motion.div>
                       <h3 className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-2xl font-bold`}>
-                        {sectionName}
+                        {category.name}
                       </h3>
-                      {videos.length > 0 && (
+                      {category.videos.length > 0 && (
                         <span className={`${theme === 'dark' ? 'text-gray-500' : 'text-gray-600'} text-sm`}>
-                          ({videos.length} video{videos.length !== 1 ? 's' : ''})
+                          ({category.videos.length} video{category.videos.length !== 1 ? 's' : ''})
                         </span>
                       )}
                     </div>
                     
-                    {videos.length > 0 ? (
+                    {category.videos.length > 0 ? (
                       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-                        {videos.map((video, index) => (
+                        {category.videos.map((video, index) => (
                           <VideoCard 
                             key={video.id} 
-                            video={video} 
-                            category={{ name: video.categoryName }} 
+                            video={{...video, categoryName: category.name, categoryId: category.id}} 
+                            category={category} 
                             index={index}
                           />
                         ))}
@@ -1808,10 +1801,10 @@ function App() {
                       <motion.div 
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className={`text-center py-12 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-600'}`}
+                        className={`text-center py-8 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-600'}`}
                       >
-                        <Search size={48} className="mx-auto mb-4 opacity-50" />
-                        <p>No se encontraron videos que coincidan con tu búsqueda.</p>
+                        <Film size={48} className="mx-auto mb-4 opacity-50" />
+                        <p>No hay videos disponibles en esta categoría.</p>
                       </motion.div>
                     )}
                   </motion.section>
