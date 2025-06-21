@@ -670,98 +670,126 @@ function App() {
   );
 
   // Login Component
-  const LoginComponent = () => (
-    <div 
-      className={`min-h-screen flex items-center justify-center bg-cover bg-center relative ${theme === 'light' ? 'bg-gray-100' : ''}`}
-      style={{
-        backgroundImage: theme === 'dark' ? `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(${customization.loginBackground})` : `linear-gradient(rgba(255,255,255,0.8), rgba(255,255,255,0.8)), url(${customization.loginBackground})`
-      }}
-    >
-      <div className={`absolute inset-0 ${theme === 'dark' ? 'bg-black opacity-40' : 'bg-white opacity-60'}`}></div>
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className={`${theme === 'dark' ? 'bg-black bg-opacity-80' : 'bg-white bg-opacity-90'} p-8 rounded-lg w-full max-w-md relative z-10 shadow-2xl`}
+  const LoginComponent = () => {
+    const [localEmail, setLocalEmail] = useState('');
+    const [localPassword, setLocalPassword] = useState('');
+
+    const handleSubmit = (e) => {
+      e.preventDefault();
+      const user = users.find(u => u.email === localEmail && u.password === localPassword && u.isActive);
+      
+      if (user) {
+        setCurrentUser(user);
+        setUserRole(user.role);
+        setIsAuthenticated(true);
+        setEmail(localEmail);
+        setPassword(localPassword);
+        
+        // Update last login
+        const updatedUsers = users.map(u => 
+          u.id === user.id ? { ...u, lastLogin: new Date().toISOString().split('T')[0] } : u
+        );
+        saveUsers(updatedUsers);
+      } else {
+        alert('Credenciales incorrectas o usuario inactivo');
+      }
+    };
+
+    return (
+      <div 
+        className={`min-h-screen flex items-center justify-center bg-cover bg-center relative ${theme === 'light' ? 'bg-gray-100' : ''}`}
+        style={{
+          backgroundImage: theme === 'dark' ? `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(${customization.loginBackground})` : `linear-gradient(rgba(255,255,255,0.8), rgba(255,255,255,0.8)), url(${customization.loginBackground})`
+        }}
       >
-        <div className="text-center mb-8">
-          {customization.logo ? (
-            <img 
-              src={customization.logo} 
-              alt={customization.companyName}
-              className="h-16 mx-auto mb-4 object-contain"
-              onError={(e) => {
-                e.target.style.display = 'none';
-                e.target.nextSibling.style.display = 'block';
-              }}
-            />
-          ) : null}
-          <h1 className={`text-4xl font-bold text-[#C5A95E] mb-2`} style={{display: customization.logo ? 'none' : 'block'}}>
-            {customization.companyName}
-          </h1>
-          <p className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-            Plataforma de Capacitación Inmobiliaria
-          </p>
-        </div>
-        
-        <form onSubmit={handleLogin} className="space-y-6">
-          <div>
-            <label className={`block ${theme === 'dark' ? 'text-white' : 'text-gray-700'} text-sm font-medium mb-2`}>
-              Correo Electrónico
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className={`w-full p-3 ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded-md border focus:border-[#C5A95E] focus:outline-none transition-colors`}
-              required
-              autoComplete="email"
-            />
-          </div>
-          
-          <div>
-            <label className={`block ${theme === 'dark' ? 'text-white' : 'text-gray-700'} text-sm font-medium mb-2`}>
-              Contraseña
-            </label>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className={`w-full p-3 pr-10 ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded-md border focus:border-[#C5A95E] focus:outline-none transition-colors`}
-                required
-                autoComplete="current-password"
+        <div className={`absolute inset-0 ${theme === 'dark' ? 'bg-black opacity-40' : 'bg-white opacity-60'}`}></div>
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={`${theme === 'dark' ? 'bg-black bg-opacity-80' : 'bg-white bg-opacity-90'} p-8 rounded-lg w-full max-w-md relative z-10 shadow-2xl`}
+        >
+          <div className="text-center mb-8">
+            {customization.logo ? (
+              <img 
+                src={customization.logo} 
+                alt={customization.companyName}
+                className="h-16 mx-auto mb-4 object-contain"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  e.target.nextSibling.style.display = 'block';
+                }}
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
-            </div>
+            ) : null}
+            <h1 className={`text-4xl font-bold text-[#C5A95E] mb-2`} style={{display: customization.logo ? 'none' : 'block'}}>
+              {customization.companyName}
+            </h1>
+            <p className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+              Plataforma de Capacitación Inmobiliaria
+            </p>
           </div>
           
-          <motion.button
-            type="submit"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="w-full bg-[#C5A95E] text-black font-semibold py-3 rounded-md hover:bg-[#B8A055] transition duration-200"
-          >
-            Iniciar Sesión
-          </motion.button>
-        </form>
-        
-        <div className="flex justify-center mt-6">
-          <button
-            onClick={toggleTheme}
-            className={`p-2 rounded-full ${theme === 'dark' ? 'bg-gray-700 text-yellow-400' : 'bg-gray-200 text-gray-700'} hover:scale-110 transition-all`}
-          >
-            {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
-          </button>
-        </div>
-      </motion.div>
-    </div>
-  );
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label className={`block ${theme === 'dark' ? 'text-white' : 'text-gray-700'} text-sm font-medium mb-2`}>
+                Correo Electrónico
+              </label>
+              <input
+                type="email"
+                value={localEmail}
+                onChange={(e) => setLocalEmail(e.target.value)}
+                className={`w-full p-3 ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded-md border focus:border-[#C5A95E] focus:outline-none transition-colors`}
+                required
+                autoComplete="email"
+                placeholder="usuario@ejemplo.com"
+              />
+            </div>
+            
+            <div>
+              <label className={`block ${theme === 'dark' ? 'text-white' : 'text-gray-700'} text-sm font-medium mb-2`}>
+                Contraseña
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={localPassword}
+                  onChange={(e) => setLocalPassword(e.target.value)}
+                  className={`w-full p-3 pr-10 ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded-md border focus:border-[#C5A95E] focus:outline-none transition-colors`}
+                  required
+                  autoComplete="current-password"
+                  placeholder="Ingrese su contraseña"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+            </div>
+            
+            <motion.button
+              type="submit"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="w-full bg-[#C5A95E] text-black font-semibold py-3 rounded-md hover:bg-[#B8A055] transition duration-200"
+            >
+              Iniciar Sesión
+            </motion.button>
+          </form>
+          
+          <div className="flex justify-center mt-6">
+            <button
+              onClick={toggleTheme}
+              className={`p-2 rounded-full ${theme === 'dark' ? 'bg-gray-700 text-yellow-400' : 'bg-gray-200 text-gray-700'} hover:scale-110 transition-all`}
+            >
+              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+            </button>
+          </div>
+        </motion.div>
+      </div>
+    );
+  };
 
   // Video Player Modal - Smaller size like Netflix
   const VideoPlayerModal = () => (
