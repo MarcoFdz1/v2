@@ -270,8 +270,7 @@ metadata:
 test_plan:
   current_focus:
     - "Admin Panel"
-  stuck_tasks:
-    - "Admin Panel"
+  stuck_tasks: []
   test_all: false
   test_priority: "high_first"
 
