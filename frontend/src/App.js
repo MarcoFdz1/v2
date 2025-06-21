@@ -1870,6 +1870,18 @@ function App() {
             </div>
             
             <div className="flex items-center space-x-4">
+              {/* Simple Search Icon */}
+              <motion.button
+                onClick={() => setCurrentView('courses')}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                className={`${theme === 'dark' ? 'text-white hover:text-[#C5A95E]' : 'text-gray-900 hover:text-[#C5A95E]'} transition p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800`}
+                title="Buscar contenido"
+              >
+                <Search size={24} />
+              </motion.button>
+
+              {/* Theme Toggle */}
               <motion.button
                 onClick={toggleTheme}
                 whileHover={{ scale: 1.1 }}
@@ -1909,23 +1921,23 @@ function App() {
                       initial={{ opacity: 0, y: -10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                      className={`absolute right-0 top-full mt-2 w-48 ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'} rounded-lg shadow-lg border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}
+                      className={`absolute right-0 top-full mt-2 min-w-max ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'} rounded-lg shadow-lg border ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}
                     >
-                      <div className={`p-4 border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
-                        <p className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-sm font-semibold`}>
+                      <div className={`p-4 border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'} min-w-max`}>
+                        <p className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-sm font-semibold whitespace-nowrap`}>
                           {currentUser?.name || 'Usuario'}
                         </p>
-                        <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} text-xs`}>
+                        <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} text-xs whitespace-nowrap`}>
                           {currentUser?.role === 'admin' ? 'Administrador' : 'Usuario'}
                         </p>
-                        <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} text-xs`}>
+                        <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} text-xs whitespace-nowrap`}>
                           {currentUser?.email}
                         </p>
                       </div>
                       <motion.button
                         onClick={handleLogout}
                         whileHover={{ backgroundColor: theme === 'dark' ? '#374151' : '#f3f4f6' }}
-                        className={`w-full flex items-center space-x-2 px-4 py-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'} transition`}
+                        className={`w-full flex items-center space-x-2 px-4 py-3 ${theme === 'dark' ? 'text-white' : 'text-gray-900'} transition whitespace-nowrap`}
                       >
                         <LogOut size={16} />
                         <span>Cerrar Sesión</span>
