@@ -490,86 +490,117 @@ function App() {
 
   // Admin Panel Component
   const AdminPanel = () => (
-    <motion.div
-      initial={{ x: '100%' }}
-      animate={{ x: 0 }}
-      exit={{ x: '100%' }}
-      className="fixed inset-y-0 right-0 w-96 bg-gray-900 shadow-2xl z-50 overflow-y-auto"
-    >
-      <div className="p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-white text-xl font-bold">Panel de Administración</h2>
-          <button
+    <AnimatePresence>
+      {showAdminPanel && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 z-40"
             onClick={() => setShowAdminPanel(false)}
-            className="text-gray-400 hover:text-white"
+          />
+          
+          {/* Panel */}
+          <motion.div
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="fixed inset-y-0 right-0 w-96 bg-gray-900 shadow-2xl z-50 overflow-y-auto"
           >
-            <X size={24} />
-          </button>
-        </div>
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-white text-xl font-bold">Panel de Administración</h2>
+                <button
+                  onClick={() => setShowAdminPanel(false)}
+                  className="text-gray-400 hover:text-white p-1 rounded-full hover:bg-gray-800 transition"
+                >
+                  <X size={24} />
+                </button>
+              </div>
 
-        <div className="space-y-6">
-          <div>
-            <h3 className="text-[#C5A95E] font-semibold mb-3">Personalización de Marca</h3>
-            <div className="space-y-3">
-              <div>
-                <label className="block text-white text-sm mb-1">Nombre de la Empresa</label>
-                <input
-                  type="text"
-                  value={customization.companyName}
-                  onChange={(e) => saveCustomization({...customization, companyName: e.target.value})}
-                  className="w-full p-2 bg-gray-800 text-white rounded border border-gray-700 focus:border-[#C5A95E] focus:outline-none text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-white text-sm mb-1">URL de Fondo de Login</label>
-                <input
-                  type="url"
-                  value={customization.loginBackground}
-                  onChange={(e) => saveCustomization({...customization, loginBackground: e.target.value})}
-                  className="w-full p-2 bg-gray-800 text-white rounded border border-gray-700 focus:border-[#C5A95E] focus:outline-none text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-white text-sm mb-1">URL de Banner Principal</label>
-                <input
-                  type="url"
-                  value={customization.heroBanner}
-                  onChange={(e) => saveCustomization({...customization, heroBanner: e.target.value})}
-                  className="w-full p-2 bg-gray-800 text-white rounded border border-gray-700 focus:border-[#C5A95E] focus:outline-none text-sm"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <h3 className="text-[#C5A95E] font-semibold mb-3">Gestión de Categorías</h3>
-            <div className="space-y-2 max-h-40 overflow-y-auto">
-              {categories.map((category) => (
-                <div key={category.id} className="flex items-center justify-between bg-gray-800 p-2 rounded">
-                  <span className="text-white text-sm">{category.name}</span>
-                  <div className="flex space-x-1">
-                    <button className="text-gray-400 hover:text-white">
-                      <Edit size={14} />
-                    </button>
-                    <button className="text-gray-400 hover:text-red-400">
-                      <Trash2 size={14} />
-                    </button>
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-[#C5A95E] font-semibold mb-3">Personalización de Marca</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-white text-sm mb-1">Nombre de la Empresa</label>
+                      <input
+                        type="text"
+                        value={customization.companyName}
+                        onChange={(e) => saveCustomization({...customization, companyName: e.target.value})}
+                        className="w-full p-2 bg-gray-800 text-white rounded border border-gray-700 focus:border-[#C5A95E] focus:outline-none text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-white text-sm mb-1">URL de Fondo de Login</label>
+                      <input
+                        type="url"
+                        value={customization.loginBackground}
+                        onChange={(e) => saveCustomization({...customization, loginBackground: e.target.value})}
+                        className="w-full p-2 bg-gray-800 text-white rounded border border-gray-700 focus:border-[#C5A95E] focus:outline-none text-sm"
+                        placeholder="https://ejemplo.com/imagen.jpg"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-white text-sm mb-1">URL de Banner Principal</label>
+                      <input
+                        type="url"
+                        value={customization.heroBanner}
+                        onChange={(e) => saveCustomization({...customization, heroBanner: e.target.value})}
+                        className="w-full p-2 bg-gray-800 text-white rounded border border-gray-700 focus:border-[#C5A95E] focus:outline-none text-sm"
+                        placeholder="https://ejemplo.com/banner.jpg"
+                      />
+                    </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
 
-          <div>
-            <h3 className="text-[#C5A95E] font-semibold mb-3">Gestión de Contenido</h3>
-            <button className="w-full bg-[#C5A95E] text-black py-2 rounded font-semibold hover:bg-[#B8A055] flex items-center justify-center space-x-2">
-              <Upload size={16} />
-              <span>Subir Nuevo Video</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    </motion.div>
+                <div>
+                  <h3 className="text-[#C5A95E] font-semibold mb-3">Gestión de Categorías</h3>
+                  <div className="space-y-2 max-h-40 overflow-y-auto">
+                    {categories.map((category) => (
+                      <div key={category.id} className="flex items-center justify-between bg-gray-800 p-2 rounded">
+                        <span className="text-white text-sm">{category.name}</span>
+                        <div className="flex space-x-1">
+                          <button 
+                            className="text-gray-400 hover:text-white p-1 rounded hover:bg-gray-700 transition"
+                            title="Editar categoría"
+                          >
+                            <Edit size={14} />
+                          </button>
+                          <button 
+                            className="text-gray-400 hover:text-red-400 p-1 rounded hover:bg-gray-700 transition"
+                            title="Eliminar categoría"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-[#C5A95E] font-semibold mb-3">Gestión de Contenido</h3>
+                  <button className="w-full bg-[#C5A95E] text-black py-2 rounded font-semibold hover:bg-[#B8A055] flex items-center justify-center space-x-2 transition">
+                    <Upload size={16} />
+                    <span>Subir Nuevo Video</span>
+                  </button>
+                </div>
+
+                <div className="pt-4 border-t border-gray-700">
+                  <p className="text-gray-400 text-xs text-center">
+                    Panel de Administración - v1.0
+                  </p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
   );
 
   // Main Dashboard Component
