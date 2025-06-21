@@ -734,9 +734,7 @@ function App() {
       <InfoModal />
 
       {/* Admin Panel */}
-      <AnimatePresence>
-        {showAdminPanel && <AdminPanel />}
-      </AnimatePresence>
+      <AdminPanel />
     </div>
   );
 
