@@ -1370,163 +1370,216 @@ function App() {
   };
 
   // Enhanced Admin Panel
-  const AdminPanel = () => (
-    <AnimatePresence>
-      {showAdminPanel && (
-        <>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 z-40"
-            onClick={() => setShowAdminPanel(false)}
-          />
-          
-          <motion.div
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className={`fixed inset-y-0 right-0 w-80 max-w-sm ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'} shadow-2xl z-50 overflow-y-auto`}
-          >
-            <div className="p-4">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-lg font-bold`}>
-                  Panel de Administración
-                </h2>
-                <button
-                  onClick={() => setShowAdminPanel(false)}
-                  className={`${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition`}
-                >
-                  <X size={20} />
-                </button>
-              </div>
+  const AdminPanel = () => {
+    const [newCategoryName, setNewCategoryName] = useState('');
 
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-[#C5A95E] font-semibold mb-2 text-sm">Personalización de Marca</h3>
-                  <div className="space-y-2">
-                    <div>
-                      <label className={`block ${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-xs mb-1`}>
-                        URL del Logo
-                      </label>
-                      <input
-                        type="text"
-                        defaultValue={customization.logo}
-                        onBlur={(e) => saveCustomization({...customization, logo: e.target.value})}
-                        className={`w-full p-2 text-xs ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded border focus:border-[#C5A95E] focus:outline-none transition-colors`}
-                        placeholder="https://ejemplo.com/logo.png"
-                      />
-                    </div>
-                    <div>
-                      <label className={`block ${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-xs mb-1`}>
-                        Nombre de la Empresa
-                      </label>
-                      <input
-                        type="text"
-                        defaultValue={customization.companyName}
-                        onBlur={(e) => saveCustomization({...customization, companyName: e.target.value})}
-                        className={`w-full p-2 text-xs ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded border focus:border-[#C5A95E] focus:outline-none transition-colors`}
-                      />
-                    </div>
-                    <div>
-                      <label className={`block ${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-xs mb-1`}>
-                        URL de Fondo de Login
-                      </label>
-                      <input
-                        type="text"
-                        defaultValue={customization.loginBackground}
-                        onBlur={(e) => saveCustomization({...customization, loginBackground: e.target.value})}
-                        className={`w-full p-2 text-xs ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded border focus:border-[#C5A95E] focus:outline-none transition-colors`}
-                        placeholder="https://ejemplo.com/imagen.jpg"
-                      />
-                    </div>
-                    <div>
-                      <label className={`block ${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-xs mb-1`}>
-                        URL de Banner Principal
-                      </label>
-                      <input
-                        type="text"
-                        defaultValue={customization.heroBanner}
-                        onBlur={(e) => saveCustomization({...customization, heroBanner: e.target.value})}
-                        className={`w-full p-2 text-xs ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded border focus:border-[#C5A95E] focus:outline-none transition-colors`}
-                        placeholder="https://ejemplo.com/banner.jpg"
-                      />
-                    </div>
-                  </div>
-                </div>
+    const addCategory = () => {
+      if (!newCategoryName.trim()) {
+        alert('Por favor ingrese un nombre para la categoría');
+        return;
+      }
 
-                <div>
-                  <h3 className="text-[#C5A95E] font-semibold mb-2 text-sm">Gestión de Usuarios</h3>
-                  <button 
-                    onClick={() => setShowUserManagement(true)}
-                    className="w-full bg-blue-600 text-white py-2 rounded font-semibold hover:bg-blue-700 flex items-center justify-center space-x-2 transition text-sm"
+      const newCategory = {
+        id: Date.now(),
+        name: newCategoryName,
+        icon: BookOpen, // Default icon
+        videos: []
+      };
+
+      const updatedCategories = [...categories, newCategory];
+      setCategories(updatedCategories);
+      localStorage.setItem('netflixRealEstateCategories', JSON.stringify(updatedCategories));
+      setNewCategoryName('');
+      alert('Categoría agregada exitosamente');
+    };
+
+    const deleteCategory = (categoryId) => {
+      if (window.confirm('¿Está seguro de eliminar esta categoría?')) {
+        const updatedCategories = categories.filter(c => c.id !== categoryId);
+        setCategories(updatedCategories);
+        localStorage.setItem('netflixRealEstateCategories', JSON.stringify(updatedCategories));
+      }
+    };
+
+    return (
+      <AnimatePresence>
+        {showAdminPanel && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black bg-opacity-50 z-40"
+              onClick={() => setShowAdminPanel(false)}
+            />
+            
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className={`fixed inset-y-0 right-0 w-80 max-w-sm ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'} shadow-2xl z-50 overflow-y-auto`}
+            >
+              <div className="p-4">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-lg font-bold`}>
+                    Panel de Administración
+                  </h2>
+                  <button
+                    onClick={() => setShowAdminPanel(false)}
+                    className={`${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition`}
                   >
-                    <Users size={14} />
-                    <span>Gestionar Usuarios</span>
+                    <X size={20} />
                   </button>
-                  <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                    Total de usuarios: {users.length}
-                  </div>
                 </div>
 
-                <div>
-                  <h3 className="text-[#C5A95E] font-semibold mb-2 text-sm">Gestión de Categorías</h3>
-                  <div className="space-y-1 max-h-32 overflow-y-auto">
-                    {categories.map((category) => (
-                      <div key={category.id} className={`flex items-center justify-between ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'} p-2 rounded text-xs`}>
-                        <span className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} flex items-center space-x-2`}>
-                          <category.icon size={12} />
-                          <span>{category.name}</span>
-                        </span>
-                        <div className="flex space-x-1">
-                          <motion.button 
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                            className={`${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} p-1 rounded hover:bg-gray-700 dark:hover:bg-gray-600 transition`}
-                            title="Editar categoría"
-                          >
-                            <Edit size={10} />
-                          </motion.button>
-                          <motion.button 
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                            className={`${theme === 'dark' ? 'text-gray-400 hover:text-red-400' : 'text-gray-600 hover:text-red-600'} p-1 rounded hover:bg-gray-700 dark:hover:bg-gray-600 transition`}
-                            title="Eliminar categoría"
-                          >
-                            <Trash2 size={10} />
-                          </motion.button>
-                        </div>
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-[#C5A95E] font-semibold mb-2 text-sm">Personalización de Marca</h3>
+                    <div className="space-y-2">
+                      <div>
+                        <label className={`block ${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-xs mb-1`}>
+                          URL del Logo
+                        </label>
+                        <input
+                          type="text"
+                          defaultValue={customization.logo}
+                          onBlur={(e) => saveCustomization({...customization, logo: e.target.value})}
+                          className={`w-full p-2 text-xs ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded border focus:border-[#C5A95E] focus:outline-none transition-colors`}
+                          placeholder="https://ejemplo.com/logo.png"
+                        />
                       </div>
-                    ))}
+                      <div>
+                        <label className={`block ${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-xs mb-1`}>
+                          Nombre de la Empresa
+                        </label>
+                        <input
+                          type="text"
+                          defaultValue={customization.companyName}
+                          onBlur={(e) => saveCustomization({...customization, companyName: e.target.value})}
+                          className={`w-full p-2 text-xs ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded border focus:border-[#C5A95E] focus:outline-none transition-colors`}
+                        />
+                      </div>
+                      <div>
+                        <label className={`block ${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-xs mb-1`}>
+                          URL de Fondo de Login
+                        </label>
+                        <input
+                          type="text"
+                          defaultValue={customization.loginBackground}
+                          onBlur={(e) => saveCustomization({...customization, loginBackground: e.target.value})}
+                          className={`w-full p-2 text-xs ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded border focus:border-[#C5A95E] focus:outline-none transition-colors`}
+                          placeholder="https://ejemplo.com/imagen.jpg"
+                        />
+                      </div>
+                      <div>
+                        <label className={`block ${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-xs mb-1`}>
+                          URL de Banner Principal
+                        </label>
+                        <input
+                          type="text"
+                          defaultValue={customization.heroBanner}
+                          onBlur={(e) => saveCustomization({...customization, heroBanner: e.target.value})}
+                          className={`w-full p-2 text-xs ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded border focus:border-[#C5A95E] focus:outline-none transition-colors`}
+                          placeholder="https://ejemplo.com/banner.jpg"
+                        />
+                      </div>
+                    </div>
                   </div>
-                </div>
 
-                <div>
-                  <h3 className="text-[#C5A95E] font-semibold mb-2 text-sm">Gestión de Contenido</h3>
-                  <motion.button 
-                    onClick={() => setShowVideoUpload(true)}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="w-full bg-[#C5A95E] text-black py-2 rounded font-semibold hover:bg-[#B8A055] flex items-center justify-center space-x-2 transition text-sm"
-                  >
-                    <Upload size={14} />
-                    <span>Subir Nuevo Video</span>
-                  </motion.button>
-                </div>
+                  <div>
+                    <h3 className="text-[#C5A95E] font-semibold mb-2 text-sm">Gestión de Usuarios</h3>
+                    <button 
+                      onClick={() => setShowUserManagement(true)}
+                      className="w-full bg-blue-600 text-white py-2 rounded font-semibold hover:bg-blue-700 flex items-center justify-center space-x-2 transition text-sm"
+                    >
+                      <Users size={14} />
+                      <span>Gestionar Usuarios</span>
+                    </button>
+                    <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                      Total de usuarios: {users.length}
+                    </div>
+                  </div>
 
-                <div className={`pt-3 border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
-                  <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} text-xs text-center`}>
-                    Panel de Administración - v2.0
-                  </p>
+                  <div>
+                    <h3 className="text-[#C5A95E] font-semibold mb-2 text-sm">Gestión de Categorías</h3>
+                    
+                    {/* Add new category */}
+                    <div className="mb-3">
+                      <div className="flex space-x-2">
+                        <input
+                          type="text"
+                          placeholder="Nombre de nueva categoría"
+                          value={newCategoryName}
+                          onChange={(e) => setNewCategoryName(e.target.value)}
+                          className={`flex-1 p-2 text-xs ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded border focus:border-[#C5A95E] focus:outline-none`}
+                        />
+                        <button
+                          onClick={addCategory}
+                          className="bg-green-600 text-white px-3 py-2 rounded text-xs hover:bg-green-700 transition"
+                        >
+                          <Plus size={12} />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1 max-h-32 overflow-y-auto">
+                      {categories.map((category) => (
+                        <div key={category.id} className={`flex items-center justify-between ${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'} p-2 rounded text-xs`}>
+                          <span className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} flex items-center space-x-2`}>
+                            <category.icon size={12} />
+                            <span>{category.name}</span>
+                          </span>
+                          <div className="flex space-x-1">
+                            <motion.button 
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
+                              className={`${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} p-1 rounded hover:bg-gray-700 dark:hover:bg-gray-600 transition`}
+                              title="Editar categoría"
+                            >
+                              <Edit size={10} />
+                            </motion.button>
+                            <motion.button 
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
+                              onClick={() => deleteCategory(category.id)}
+                              className={`${theme === 'dark' ? 'text-gray-400 hover:text-red-400' : 'text-gray-600 hover:text-red-600'} p-1 rounded hover:bg-gray-700 dark:hover:bg-gray-600 transition`}
+                              title="Eliminar categoría"
+                            >
+                              <Trash2 size={10} />
+                            </motion.button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-[#C5A95E] font-semibold mb-2 text-sm">Gestión de Contenido</h3>
+                    <motion.button 
+                      onClick={() => setShowVideoUpload(true)}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="w-full bg-[#C5A95E] text-black py-2 rounded font-semibold hover:bg-[#B8A055] flex items-center justify-center space-x-2 transition text-sm"
+                    >
+                      <Upload size={14} />
+                      <span>Subir Nuevo Video</span>
+                    </motion.button>
+                  </div>
+
+                  <div className={`pt-3 border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+                    <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} text-xs text-center`}>
+                      Panel de Administración - v2.0
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          </motion.div>
-        </>
-      )}
-    </AnimatePresence>
-  );
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    );
+  };
 
   // Progress View Component
   const ProgressView = () => (
