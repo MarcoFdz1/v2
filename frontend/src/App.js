@@ -937,154 +937,188 @@ function App() {
   );
 
   // User Management Modal
-  const UserManagementModal = () => (
-    <AnimatePresence>
-      {showUserManagement && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4"
-          onClick={() => setShowUserManagement(false)}
-        >
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.8, opacity: 0 }}
-            className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className={`${theme === 'dark' ? 'bg-gray-900' : 'bg-white'} rounded-lg shadow-2xl`}>
-              <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-                <h2 className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-2xl font-bold`}>
-                  Gestión de Usuarios
-                </h2>
-                <button
-                  onClick={() => setShowUserManagement(false)}
-                  className={`${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition`}
-                >
-                  <X size={24} />
-                </button>
-              </div>
+  const UserManagementModal = () => {
+    const [localNewUser, setLocalNewUser] = useState({
+      name: '',
+      email: '',
+      password: '',
+      role: 'user'
+    });
 
-              <div className="p-6">
-                {/* Create New User */}
-                <div className="mb-8">
-                  <h3 className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-lg font-semibold mb-4`}>
-                    Crear Nuevo Usuario
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <input
-                      type="text"
-                      placeholder="Nombre completo"
-                      value={newUser.name}
-                      onChange={(e) => setNewUser({...newUser, name: e.target.value})}
-                      className={`p-3 ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded-lg border focus:border-[#C5A95E] focus:outline-none`}
-                    />
-                    <input
-                      type="email"
-                      placeholder="Correo electrónico"
-                      value={newUser.email}
-                      onChange={(e) => setNewUser({...newUser, email: e.target.value})}
-                      className={`p-3 ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded-lg border focus:border-[#C5A95E] focus:outline-none`}
-                    />
-                    <input
-                      type="password"
-                      placeholder="Contraseña"
-                      value={newUser.password}
-                      onChange={(e) => setNewUser({...newUser, password: e.target.value})}
-                      className={`p-3 ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded-lg border focus:border-[#C5A95E] focus:outline-none`}
-                    />
-                    <select
-                      value={newUser.role}
-                      onChange={(e) => setNewUser({...newUser, role: e.target.value})}
-                      className={`p-3 ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded-lg border focus:border-[#C5A95E] focus:outline-none`}
-                    >
-                      <option value="user">Usuario</option>
-                      <option value="admin">Administrador</option>
-                    </select>
-                  </div>
+    const handleCreateUser = () => {
+      if (!localNewUser.name || !localNewUser.email || !localNewUser.password) {
+        alert('Por favor complete todos los campos');
+        return;
+      }
+
+      if (users.find(u => u.email === localNewUser.email)) {
+        alert('Ya existe un usuario con este email');
+        return;
+      }
+
+      const user = {
+        id: Date.now(),
+        ...localNewUser,
+        createdAt: new Date().toISOString().split('T')[0],
+        lastLogin: null,
+        isActive: true
+      };
+
+      const updatedUsers = [...users, user];
+      saveUsers(updatedUsers);
+      setLocalNewUser({ name: '', email: '', password: '', role: 'user' });
+      alert('Usuario creado exitosamente');
+    };
+
+    return (
+      <AnimatePresence>
+        {showUserManagement && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4"
+            onClick={() => setShowUserManagement(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className={`${theme === 'dark' ? 'bg-gray-900' : 'bg-white'} rounded-lg shadow-2xl`}>
+                <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+                  <h2 className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-2xl font-bold`}>
+                    Gestión de Usuarios
+                  </h2>
                   <button
-                    onClick={createUser}
-                    className="mt-4 bg-[#C5A95E] text-black px-6 py-3 rounded-lg font-semibold hover:bg-[#B8A055] transition flex items-center space-x-2"
+                    onClick={() => setShowUserManagement(false)}
+                    className={`${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition`}
                   >
-                    <UserPlus size={20} />
-                    <span>Crear Usuario</span>
+                    <X size={24} />
                   </button>
                 </div>
 
-                {/* Users List */}
-                <div>
-                  <h3 className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-lg font-semibold mb-4`}>
-                    Usuarios Registrados ({users.length})
-                  </h3>
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead>
-                        <tr className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'}`}>
-                          <th className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-left p-3`}>Usuario</th>
-                          <th className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-left p-3`}>Email</th>
-                          <th className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-left p-3`}>Rol</th>
-                          <th className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-left p-3`}>Estado</th>
-                          <th className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-left p-3`}>Último Acceso</th>
-                          <th className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-left p-3`}>Acciones</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {users.map(user => (
-                          <tr key={user.id} className={`border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
-                            <td className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} p-3`}>{user.name}</td>
-                            <td className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'} p-3`}>{user.email}</td>
-                            <td className="p-3">
-                              <span className={`px-2 py-1 rounded text-xs ${
-                                user.role === 'admin' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
-                              }`}>
-                                {user.role === 'admin' ? 'Admin' : 'Usuario'}
-                              </span>
-                            </td>
-                            <td className="p-3">
-                              <span className={`px-2 py-1 rounded text-xs ${
-                                user.isActive ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
-                              }`}>
-                                {user.isActive ? 'Activo' : 'Inactivo'}
-                              </span>
-                            </td>
-                            <td className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'} p-3`}>
-                              {user.lastLogin || 'Nunca'}
-                            </td>
-                            <td className="p-3">
-                              <div className="flex space-x-2">
-                                <button
-                                  onClick={() => toggleUserStatus(user.id)}
-                                  className={`p-1 rounded ${user.isActive ? 'text-red-600 hover:bg-red-100 dark:hover:bg-red-900' : 'text-green-600 hover:bg-green-100 dark:hover:bg-green-900'} transition`}
-                                  title={user.isActive ? 'Desactivar' : 'Activar'}
-                                >
-                                  {user.isActive ? <X size={16} /> : <Plus size={16} />}
-                                </button>
-                                {user.role !== 'admin' && (
-                                  <button
-                                    onClick={() => deleteUser(user.id)}
-                                    className="p-1 rounded text-red-600 hover:bg-red-100 dark:hover:bg-red-900 transition"
-                                    title="Eliminar usuario"
-                                  >
-                                    <Trash2 size={16} />
-                                  </button>
-                                )}
-                              </div>
-                            </td>
+                <div className="p-6">
+                  {/* Create New User */}
+                  <div className="mb-8">
+                    <h3 className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-lg font-semibold mb-4`}>
+                      Crear Nuevo Usuario
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <input
+                        type="text"
+                        placeholder="Nombre completo"
+                        value={localNewUser.name}
+                        onChange={(e) => setLocalNewUser({...localNewUser, name: e.target.value})}
+                        className={`p-3 ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded-lg border focus:border-[#C5A95E] focus:outline-none`}
+                      />
+                      <input
+                        type="email"
+                        placeholder="Correo electrónico"
+                        value={localNewUser.email}
+                        onChange={(e) => setLocalNewUser({...localNewUser, email: e.target.value})}
+                        className={`p-3 ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded-lg border focus:border-[#C5A95E] focus:outline-none`}
+                      />
+                      <input
+                        type="password"
+                        placeholder="Contraseña"
+                        value={localNewUser.password}
+                        onChange={(e) => setLocalNewUser({...localNewUser, password: e.target.value})}
+                        className={`p-3 ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded-lg border focus:border-[#C5A95E] focus:outline-none`}
+                      />
+                      <select
+                        value={localNewUser.role}
+                        onChange={(e) => setLocalNewUser({...localNewUser, role: e.target.value})}
+                        className={`p-3 ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded-lg border focus:border-[#C5A95E] focus:outline-none`}
+                      >
+                        <option value="user">Usuario</option>
+                        <option value="admin">Administrador</option>
+                      </select>
+                    </div>
+                    <button
+                      onClick={handleCreateUser}
+                      className="mt-4 bg-[#C5A95E] text-black px-6 py-3 rounded-lg font-semibold hover:bg-[#B8A055] transition flex items-center space-x-2"
+                    >
+                      <UserPlus size={20} />
+                      <span>Crear Usuario</span>
+                    </button>
+                  </div>
+
+                  {/* Users List */}
+                  <div>
+                    <h3 className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-lg font-semibold mb-4`}>
+                      Usuarios Registrados ({users.length})
+                    </h3>
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead>
+                          <tr className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'}`}>
+                            <th className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-left p-3`}>Usuario</th>
+                            <th className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-left p-3`}>Email</th>
+                            <th className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-left p-3`}>Rol</th>
+                            <th className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-left p-3`}>Estado</th>
+                            <th className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-left p-3`}>Último Acceso</th>
+                            <th className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-left p-3`}>Acciones</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody>
+                          {users.map(user => (
+                            <tr key={user.id} className={`border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+                              <td className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} p-3`}>{user.name || 'Administrador'}</td>
+                              <td className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'} p-3`}>{user.email}</td>
+                              <td className="p-3">
+                                <span className={`px-2 py-1 rounded text-xs ${
+                                  user.role === 'admin' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+                                }`}>
+                                  {user.role === 'admin' ? 'Admin' : 'Usuario'}
+                                </span>
+                              </td>
+                              <td className="p-3">
+                                <span className={`px-2 py-1 rounded text-xs ${
+                                  user.isActive ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+                                }`}>
+                                  {user.isActive ? 'Activo' : 'Inactivo'}
+                                </span>
+                              </td>
+                              <td className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'} p-3`}>
+                                {user.lastLogin || 'Nunca'}
+                              </td>
+                              <td className="p-3">
+                                <div className="flex space-x-2">
+                                  <button
+                                    onClick={() => toggleUserStatus(user.id)}
+                                    className={`p-1 rounded ${user.isActive ? 'text-red-600 hover:bg-red-100 dark:hover:bg-red-900' : 'text-green-600 hover:bg-green-100 dark:hover:bg-green-900'} transition`}
+                                    title={user.isActive ? 'Desactivar' : 'Activar'}
+                                  >
+                                    {user.isActive ? <X size={16} /> : <Plus size={16} />}
+                                  </button>
+                                  {user.role !== 'admin' && (
+                                    <button
+                                      onClick={() => deleteUser(user.id)}
+                                      className="p-1 rounded text-red-600 hover:bg-red-100 dark:hover:bg-red-900 transition"
+                                      title="Eliminar usuario"
+                                    >
+                                      <Trash2 size={16} />
+                                    </button>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
+        )}
+      </AnimatePresence>
+    );
+  };
 
   // Video Upload Modal
   const VideoUploadModal = () => (
