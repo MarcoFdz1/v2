@@ -31,7 +31,14 @@ import {
   Menu,
   Star,
   Clock,
-  TrendingDown
+  TrendingDown,
+  Save,
+  UserPlus,
+  Eye,
+  EyeOff,
+  ChevronDown,
+  BarChart3,
+  BookMarked
 } from 'lucide-react';
 import './App.css';
 
@@ -123,7 +130,6 @@ const realEstateCategories = [
       }
     ]
   },
-  // ... (continuing with the same pattern for other categories)
   {
     id: 4,
     name: 'Finanzas y Economía',
@@ -246,29 +252,10 @@ const realEstateCategories = [
   }
 ];
 
-// Theme configurations
-const themes = {
-  dark: {
-    primary: '#000000',
-    secondary: '#1a1a1a',
-    accent: '#C5A95E',
-    text: '#ffffff',
-    textSecondary: '#d1d5db',
-    border: '#374151'
-  },
-  light: {
-    primary: '#ffffff',
-    secondary: '#f9fafb',
-    accent: '#C5A95E',
-    text: '#111827',
-    textSecondary: '#6b7280',
-    border: '#e5e7eb'
-  }
-};
-
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [selectedVideo, setSelectedVideo] = useState(null);
@@ -276,14 +263,36 @@ function App() {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [categories, setCategories] = useState(realEstateCategories);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const [showVideoUpload, setShowVideoUpload] = useState(false);
+  const [showUserManagement, setShowUserManagement] = useState(false);
+  const [currentView, setCurrentView] = useState('home'); // home, courses, progress
   const [theme, setTheme] = useState('dark');
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [users, setUsers] = useState([
+    {
+      id: 1,
+      email: 'unbrokerage@realtyonegroupmexico.mx',
+      password: 'OneVision$07',
+      role: 'admin',
+      name: 'Administrador',
+      createdAt: '2024-01-01',
+      lastLogin: '2024-03-15',
+      isActive: true
+    }
+  ]);
+  const [newUser, setNewUser] = useState({
+    name: '',
+    email: '',
+    password: '',
+    role: 'user'
+  });
+  const [showPassword, setShowPassword] = useState(false);
   const [customization, setCustomization] = useState({
-    logo: null,
+    logo: 'https://images.unsplash.com/photo-1560472355-536de3962603?w=200&h=80&fit=crop',
     heroBanner: 'https://images.unsplash.com/photo-1524292691042-82ed9c62673b',
     loginBackground: 'https://images.unsplash.com/photo-1559458049-9d62fceeb52b',
     companyName: 'REALTY ONE GROUP MÉXICO'
@@ -291,11 +300,13 @@ function App() {
 
   // Animation controls
   const controls = useAnimation();
+  const userMenuRef = useRef(null);
 
   // Load saved settings from localStorage
   useEffect(() => {
     const savedCustomization = localStorage.getItem('netflixRealEstateCustomization');
     const savedTheme = localStorage.getItem('netflixRealEstateTheme');
+    const savedUsers = localStorage.getItem('netflixRealEstateUsers');
     
     if (savedCustomization) {
       setCustomization(JSON.parse(savedCustomization));
@@ -303,15 +314,37 @@ function App() {
     if (savedTheme) {
       setTheme(savedTheme);
     }
+    if (savedUsers) {
+      setUsers(JSON.parse(savedUsers));
+    }
 
     // Simulate loading
-    setTimeout(() => setIsLoading(false), 2000);
+    setTimeout(() => setIsLoading(false), 1500);
+  }, []);
+
+  // Close user menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setShowUserMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
 
   // Save settings to localStorage
   const saveCustomization = (newCustomization) => {
     setCustomization(newCustomization);
     localStorage.setItem('netflixRealEstateCustomization', JSON.stringify(newCustomization));
+  };
+
+  const saveUsers = (newUsers) => {
+    setUsers(newUsers);
+    localStorage.setItem('netflixRealEstateUsers', JSON.stringify(newUsers));
   };
 
   const toggleTheme = () => {
@@ -335,7 +368,6 @@ function App() {
   const getFilteredVideos = () => {
     let videos = getAllVideos();
 
-    // Apply search filter
     if (searchQuery) {
       videos = videos.filter(video =>
         video.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -344,12 +376,10 @@ function App() {
       );
     }
 
-    // Apply category filter
     if (filterCategory !== 'all') {
       videos = videos.filter(video => video.categoryId === parseInt(filterCategory));
     }
 
-    // Apply sorting
     switch (sortBy) {
       case 'newest':
         videos.sort((a, b) => new Date(b.releaseDate) - new Date(a.releaseDate));
@@ -375,28 +405,71 @@ function App() {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    if (email === 'unbrokerage@realtyonegroupmexico.mx') {
-      if (password === 'OneVision$07') {
-        setUserRole('admin');
-        setIsAuthenticated(true);
-      } else if (password === 'AgenteONE13') {
-        setUserRole('user');
-        setIsAuthenticated(true);
-      } else {
-        alert('Contraseña incorrecta');
-      }
+    const user = users.find(u => u.email === email && u.password === password && u.isActive);
+    
+    if (user) {
+      setCurrentUser(user);
+      setUserRole(user.role);
+      setIsAuthenticated(true);
+      
+      // Update last login
+      const updatedUsers = users.map(u => 
+        u.id === user.id ? { ...u, lastLogin: new Date().toISOString().split('T')[0] } : u
+      );
+      saveUsers(updatedUsers);
     } else {
-      alert('Email no reconocido');
+      alert('Credenciales incorrectas o usuario inactivo');
     }
   };
 
   const handleLogout = () => {
     setIsAuthenticated(false);
     setUserRole(null);
+    setCurrentUser(null);
     setEmail('');
     setPassword('');
     setShowUserMenu(false);
     setShowAdminPanel(false);
+    setCurrentView('home');
+  };
+
+  const createUser = () => {
+    if (!newUser.name || !newUser.email || !newUser.password) {
+      alert('Por favor complete todos los campos');
+      return;
+    }
+
+    if (users.find(u => u.email === newUser.email)) {
+      alert('Ya existe un usuario con este email');
+      return;
+    }
+
+    const user = {
+      id: Date.now(),
+      ...newUser,
+      createdAt: new Date().toISOString().split('T')[0],
+      lastLogin: null,
+      isActive: true
+    };
+
+    const updatedUsers = [...users, user];
+    saveUsers(updatedUsers);
+    setNewUser({ name: '', email: '', password: '', role: 'user' });
+    alert('Usuario creado exitosamente');
+  };
+
+  const toggleUserStatus = (userId) => {
+    const updatedUsers = users.map(u => 
+      u.id === userId ? { ...u, isActive: !u.isActive } : u
+    );
+    saveUsers(updatedUsers);
+  };
+
+  const deleteUser = (userId) => {
+    if (window.confirm('¿Está seguro de eliminar este usuario?')) {
+      const updatedUsers = users.filter(u => u.id !== userId);
+      saveUsers(updatedUsers);
+    }
   };
 
   const playVideo = (video) => {
@@ -411,15 +484,6 @@ function App() {
     setSelectedVideo(null);
     setInfoModalVideo(null);
   };
-
-  // Loading Skeleton Component
-  const LoadingSkeleton = () => (
-    <div className="animate-pulse">
-      <div className="aspect-video bg-gray-300 dark:bg-gray-700 rounded-lg mb-4"></div>
-      <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
-      <div className="h-3 bg-gray-300 dark:bg-gray-700 rounded w-1/2"></div>
-    </div>
-  );
 
   // Enhanced Video Card with animations
   const VideoCard = ({ video, category, index }) => {
@@ -516,7 +580,6 @@ function App() {
       className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg mb-8"
     >
       <div className="flex flex-col lg:flex-row gap-4">
-        {/* Search */}
         <div className="flex-1 relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
           <input
@@ -528,7 +591,6 @@ function App() {
           />
         </div>
         
-        {/* Filter by Category */}
         <div className="relative">
           <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
           <select
@@ -543,7 +605,6 @@ function App() {
           </select>
         </div>
         
-        {/* Sort */}
         <div className="relative">
           <SortAsc className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
           <select
@@ -560,7 +621,6 @@ function App() {
         </div>
       </div>
       
-      {/* Results count */}
       {(searchQuery || filterCategory !== 'all') && (
         <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
           {getFilteredVideos().length} resultado(s) encontrado(s)
@@ -577,17 +637,26 @@ function App() {
       className="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 z-40"
     >
       <div className="flex justify-around py-2">
-        <button className="flex flex-col items-center py-2 px-4 text-[#C5A95E]">
+        <button 
+          onClick={() => setCurrentView('home')}
+          className={`flex flex-col items-center py-2 px-4 ${currentView === 'home' ? 'text-[#C5A95E]' : 'text-gray-600 dark:text-gray-400'}`}
+        >
           <Home size={20} />
           <span className="text-xs mt-1">Inicio</span>
         </button>
-        <button className="flex flex-col items-center py-2 px-4 text-gray-600 dark:text-gray-400">
-          <Search size={20} />
-          <span className="text-xs mt-1">Buscar</span>
+        <button 
+          onClick={() => setCurrentView('courses')}
+          className={`flex flex-col items-center py-2 px-4 ${currentView === 'courses' ? 'text-[#C5A95E]' : 'text-gray-600 dark:text-gray-400'}`}
+        >
+          <BookMarked size={20} />
+          <span className="text-xs mt-1">Cursos</span>
         </button>
-        <button className="flex flex-col items-center py-2 px-4 text-gray-600 dark:text-gray-400">
-          <Film size={20} />
-          <span className="text-xs mt-1">Mi Lista</span>
+        <button 
+          onClick={() => setCurrentView('progress')}
+          className={`flex flex-col items-center py-2 px-4 ${currentView === 'progress' ? 'text-[#C5A95E]' : 'text-gray-600 dark:text-gray-400'}`}
+        >
+          <BarChart3 size={20} />
+          <span className="text-xs mt-1">Mi Progreso</span>
         </button>
         <button 
           className="flex flex-col items-center py-2 px-4 text-gray-600 dark:text-gray-400"
@@ -600,7 +669,7 @@ function App() {
     </motion.div>
   );
 
-  // Login Component with theme support
+  // Login Component
   const LoginComponent = () => (
     <div 
       className={`min-h-screen flex items-center justify-center bg-cover bg-center relative ${theme === 'light' ? 'bg-gray-100' : ''}`}
@@ -615,7 +684,18 @@ function App() {
         className={`${theme === 'dark' ? 'bg-black bg-opacity-80' : 'bg-white bg-opacity-90'} p-8 rounded-lg w-full max-w-md relative z-10 shadow-2xl`}
       >
         <div className="text-center mb-8">
-          <h1 className={`text-4xl font-bold text-[#C5A95E] mb-2`}>
+          {customization.logo ? (
+            <img 
+              src={customization.logo} 
+              alt={customization.companyName}
+              className="h-16 mx-auto mb-4 object-contain"
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.nextSibling.style.display = 'block';
+              }}
+            />
+          ) : null}
+          <h1 className={`text-4xl font-bold text-[#C5A95E] mb-2`} style={{display: customization.logo ? 'none' : 'block'}}>
             {customization.companyName}
           </h1>
           <p className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
@@ -634,6 +714,7 @@ function App() {
               onChange={(e) => setEmail(e.target.value)}
               className={`w-full p-3 ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded-md border focus:border-[#C5A95E] focus:outline-none transition-colors`}
               required
+              autoComplete="email"
             />
           </div>
           
@@ -641,13 +722,23 @@ function App() {
             <label className={`block ${theme === 'dark' ? 'text-white' : 'text-gray-700'} text-sm font-medium mb-2`}>
               Contraseña
             </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className={`w-full p-3 ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded-md border focus:border-[#C5A95E] focus:outline-none transition-colors`}
-              required
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className={`w-full p-3 pr-10 ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded-md border focus:border-[#C5A95E] focus:outline-none transition-colors`}
+                required
+                autoComplete="current-password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
           </div>
           
           <motion.button
@@ -660,7 +751,6 @@ function App() {
           </motion.button>
         </form>
         
-        {/* Theme toggle on login page */}
         <div className="flex justify-center mt-6">
           <button
             onClick={toggleTheme}
@@ -673,7 +763,7 @@ function App() {
     </div>
   );
 
-  // Enhanced Video Player Modal
+  // Video Player Modal - Smaller size like Netflix
   const VideoPlayerModal = () => (
     <AnimatePresence>
       {selectedVideo && (
@@ -681,14 +771,14 @@ function App() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black bg-opacity-95 flex items-center justify-center z-50"
+          className="fixed inset-0 bg-black bg-opacity-95 flex items-center justify-center z-50 p-4"
           onClick={closeModals}
         >
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.8, opacity: 0 }}
-            className="relative w-full max-w-6xl mx-4"
+            className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
@@ -703,7 +793,7 @@ function App() {
                 <X size={24} />
               </motion.button>
             </div>
-            <div className="aspect-video bg-black rounded-lg overflow-hidden shadow-2xl">
+            <div className="aspect-video bg-black rounded-lg overflow-hidden shadow-2xl mb-4">
               <iframe
                 src={`https://www.youtube.com/embed/${selectedVideo.youtubeId}?autoplay=1`}
                 title={selectedVideo.title}
@@ -715,7 +805,7 @@ function App() {
             <motion.div 
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              className="bg-gray-900 p-6 rounded-b-lg"
+              className="bg-gray-900 p-6 rounded-lg"
             >
               <p className="text-gray-300 mb-4">{selectedVideo.description}</p>
               <div className="flex items-center justify-between text-sm text-gray-400">
@@ -751,7 +841,7 @@ function App() {
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.8, opacity: 0 }}
-            className="relative w-full max-w-2xl"
+            className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <motion.button
@@ -846,6 +936,281 @@ function App() {
     </AnimatePresence>
   );
 
+  // User Management Modal
+  const UserManagementModal = () => (
+    <AnimatePresence>
+      {showUserManagement && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4"
+          onClick={() => setShowUserManagement(false)}
+        >
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className={`${theme === 'dark' ? 'bg-gray-900' : 'bg-white'} rounded-lg shadow-2xl`}>
+              <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+                <h2 className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-2xl font-bold`}>
+                  Gestión de Usuarios
+                </h2>
+                <button
+                  onClick={() => setShowUserManagement(false)}
+                  className={`${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition`}
+                >
+                  <X size={24} />
+                </button>
+              </div>
+
+              <div className="p-6">
+                {/* Create New User */}
+                <div className="mb-8">
+                  <h3 className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-lg font-semibold mb-4`}>
+                    Crear Nuevo Usuario
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input
+                      type="text"
+                      placeholder="Nombre completo"
+                      value={newUser.name}
+                      onChange={(e) => setNewUser({...newUser, name: e.target.value})}
+                      className={`p-3 ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded-lg border focus:border-[#C5A95E] focus:outline-none`}
+                    />
+                    <input
+                      type="email"
+                      placeholder="Correo electrónico"
+                      value={newUser.email}
+                      onChange={(e) => setNewUser({...newUser, email: e.target.value})}
+                      className={`p-3 ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded-lg border focus:border-[#C5A95E] focus:outline-none`}
+                    />
+                    <input
+                      type="password"
+                      placeholder="Contraseña"
+                      value={newUser.password}
+                      onChange={(e) => setNewUser({...newUser, password: e.target.value})}
+                      className={`p-3 ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded-lg border focus:border-[#C5A95E] focus:outline-none`}
+                    />
+                    <select
+                      value={newUser.role}
+                      onChange={(e) => setNewUser({...newUser, role: e.target.value})}
+                      className={`p-3 ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded-lg border focus:border-[#C5A95E] focus:outline-none`}
+                    >
+                      <option value="user">Usuario</option>
+                      <option value="admin">Administrador</option>
+                    </select>
+                  </div>
+                  <button
+                    onClick={createUser}
+                    className="mt-4 bg-[#C5A95E] text-black px-6 py-3 rounded-lg font-semibold hover:bg-[#B8A055] transition flex items-center space-x-2"
+                  >
+                    <UserPlus size={20} />
+                    <span>Crear Usuario</span>
+                  </button>
+                </div>
+
+                {/* Users List */}
+                <div>
+                  <h3 className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-lg font-semibold mb-4`}>
+                    Usuarios Registrados ({users.length})
+                  </h3>
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'}`}>
+                          <th className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-left p-3`}>Usuario</th>
+                          <th className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-left p-3`}>Email</th>
+                          <th className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-left p-3`}>Rol</th>
+                          <th className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-left p-3`}>Estado</th>
+                          <th className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-left p-3`}>Último Acceso</th>
+                          <th className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-left p-3`}>Acciones</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {users.map(user => (
+                          <tr key={user.id} className={`border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+                            <td className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} p-3`}>{user.name}</td>
+                            <td className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'} p-3`}>{user.email}</td>
+                            <td className="p-3">
+                              <span className={`px-2 py-1 rounded text-xs ${
+                                user.role === 'admin' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' : 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+                              }`}>
+                                {user.role === 'admin' ? 'Admin' : 'Usuario'}
+                              </span>
+                            </td>
+                            <td className="p-3">
+                              <span className={`px-2 py-1 rounded text-xs ${
+                                user.isActive ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+                              }`}>
+                                {user.isActive ? 'Activo' : 'Inactivo'}
+                              </span>
+                            </td>
+                            <td className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'} p-3`}>
+                              {user.lastLogin || 'Nunca'}
+                            </td>
+                            <td className="p-3">
+                              <div className="flex space-x-2">
+                                <button
+                                  onClick={() => toggleUserStatus(user.id)}
+                                  className={`p-1 rounded ${user.isActive ? 'text-red-600 hover:bg-red-100 dark:hover:bg-red-900' : 'text-green-600 hover:bg-green-100 dark:hover:bg-green-900'} transition`}
+                                  title={user.isActive ? 'Desactivar' : 'Activar'}
+                                >
+                                  {user.isActive ? <X size={16} /> : <Plus size={16} />}
+                                </button>
+                                {user.role !== 'admin' && (
+                                  <button
+                                    onClick={() => deleteUser(user.id)}
+                                    className="p-1 rounded text-red-600 hover:bg-red-100 dark:hover:bg-red-900 transition"
+                                    title="Eliminar usuario"
+                                  >
+                                    <Trash2 size={16} />
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+
+  // Video Upload Modal
+  const VideoUploadModal = () => (
+    <AnimatePresence>
+      {showVideoUpload && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4"
+          onClick={() => setShowVideoUpload(false)}
+        >
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            className="relative w-full max-w-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className={`${theme === 'dark' ? 'bg-gray-900' : 'bg-white'} rounded-lg shadow-2xl`}>
+              <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+                <h2 className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-2xl font-bold`}>
+                  Subir Nuevo Video
+                </h2>
+                <button
+                  onClick={() => setShowVideoUpload(false)}
+                  className={`${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition`}
+                >
+                  <X size={24} />
+                </button>
+              </div>
+
+              <div className="p-6 space-y-4">
+                <div>
+                  <label className={`block ${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-sm font-medium mb-2`}>
+                    Título del Video
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Ingrese el título del video"
+                    className={`w-full p-3 ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded-lg border focus:border-[#C5A95E] focus:outline-none`}
+                  />
+                </div>
+
+                <div>
+                  <label className={`block ${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-sm font-medium mb-2`}>
+                    Descripción
+                  </label>
+                  <textarea
+                    rows="3"
+                    placeholder="Descripción del video..."
+                    className={`w-full p-3 ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded-lg border focus:border-[#C5A95E] focus:outline-none resize-none`}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className={`block ${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-sm font-medium mb-2`}>
+                      Categoría
+                    </label>
+                    <select className={`w-full p-3 ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded-lg border focus:border-[#C5A95E] focus:outline-none`}>
+                      {categories.map(category => (
+                        <option key={category.id} value={category.id}>{category.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className={`block ${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-sm font-medium mb-2`}>
+                      Dificultad
+                    </label>
+                    <select className={`w-full p-3 ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded-lg border focus:border-[#C5A95E] focus:outline-none`}>
+                      <option value="Principiante">Principiante</option>
+                      <option value="Intermedio">Intermedio</option>
+                      <option value="Avanzado">Avanzado</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className={`block ${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-sm font-medium mb-2`}>
+                    URL del Video (YouTube/Vimeo)
+                  </label>
+                  <input
+                    type="url"
+                    placeholder="https://youtube.com/watch?v=..."
+                    className={`w-full p-3 ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded-lg border focus:border-[#C5A95E] focus:outline-none`}
+                  />
+                </div>
+
+                <div>
+                  <label className={`block ${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-sm font-medium mb-2`}>
+                    URL de Miniatura
+                  </label>
+                  <input
+                    type="url"
+                    placeholder="https://ejemplo.com/miniatura.jpg"
+                    className={`w-full p-3 ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded-lg border focus:border-[#C5A95E] focus:outline-none`}
+                  />
+                </div>
+
+                <div className="flex space-x-4 pt-4">
+                  <button
+                    onClick={() => {
+                      alert('Video subido exitosamente (funcionalidad simulada)');
+                      setShowVideoUpload(false);
+                    }}
+                    className="flex-1 bg-[#C5A95E] text-black py-3 rounded-lg font-semibold hover:bg-[#B8A055] transition flex items-center justify-center space-x-2"
+                  >
+                    <Upload size={20} />
+                    <span>Subir Video</span>
+                  </button>
+                  <button
+                    onClick={() => setShowVideoUpload(false)}
+                    className="px-6 py-3 bg-gray-600 text-white rounded-lg font-semibold hover:bg-gray-700 transition"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+
   // Enhanced Admin Panel
   const AdminPanel = () => (
     <AnimatePresence>
@@ -885,6 +1250,18 @@ function App() {
                   <div className="space-y-3">
                     <div>
                       <label className={`block ${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-sm mb-1`}>
+                        URL del Logo
+                      </label>
+                      <input
+                        type="url"
+                        value={customization.logo}
+                        onChange={(e) => saveCustomization({...customization, logo: e.target.value})}
+                        className={`w-full p-2 ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded border focus:border-[#C5A95E] focus:outline-none text-sm transition-colors`}
+                        placeholder="https://ejemplo.com/logo.png"
+                      />
+                    </div>
+                    <div>
+                      <label className={`block ${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-sm mb-1`}>
                         Nombre de la Empresa
                       </label>
                       <input
@@ -922,6 +1299,20 @@ function App() {
                 </div>
 
                 <div>
+                  <h3 className="text-[#C5A95E] font-semibold mb-3">Gestión de Usuarios</h3>
+                  <button 
+                    onClick={() => setShowUserManagement(true)}
+                    className="w-full bg-blue-600 text-white py-2 rounded font-semibold hover:bg-blue-700 flex items-center justify-center space-x-2 transition mb-3"
+                  >
+                    <Users size={16} />
+                    <span>Gestionar Usuarios</span>
+                  </button>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                    Total de usuarios: {users.length}
+                  </div>
+                </div>
+
+                <div>
                   <h3 className="text-[#C5A95E] font-semibold mb-3">Gestión de Categorías</h3>
                   <div className="space-y-2 max-h-40 overflow-y-auto">
                     {categories.map((category) => (
@@ -955,6 +1346,7 @@ function App() {
                 <div>
                   <h3 className="text-[#C5A95E] font-semibold mb-3">Gestión de Contenido</h3>
                   <motion.button 
+                    onClick={() => setShowVideoUpload(true)}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     className="w-full bg-[#C5A95E] text-black py-2 rounded font-semibold hover:bg-[#B8A055] flex items-center justify-center space-x-2 transition"
@@ -966,7 +1358,7 @@ function App() {
 
                 <div className={`pt-4 border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
                   <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} text-xs text-center`}>
-                    Panel de Administración - v1.0
+                    Panel de Administración - v2.0
                   </p>
                 </div>
               </div>
@@ -977,7 +1369,113 @@ function App() {
     </AnimatePresence>
   );
 
-  // Enhanced Dashboard with theme support
+  // Progress View Component
+  const ProgressView = () => (
+    <div className="container mx-auto px-4 py-8">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="max-w-4xl mx-auto"
+      >
+        <h1 className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-3xl font-bold mb-8`}>
+          Mi Progreso de Aprendizaje
+        </h1>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} p-6 rounded-lg shadow-lg`}>
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="bg-[#C5A95E] p-3 rounded-full">
+                <BookMarked className="text-white" size={24} />
+              </div>
+              <div>
+                <h3 className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} font-semibold`}>Cursos Completados</h3>
+                <p className="text-[#C5A95E] text-2xl font-bold">7</p>
+              </div>
+            </div>
+          </div>
+
+          <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} p-6 rounded-lg shadow-lg`}>
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="bg-blue-600 p-3 rounded-full">
+                <Clock className="text-white" size={24} />
+              </div>
+              <div>
+                <h3 className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} font-semibold`}>Tiempo Total</h3>
+                <p className="text-blue-600 text-2xl font-bold">42h</p>
+              </div>
+            </div>
+          </div>
+
+          <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} p-6 rounded-lg shadow-lg`}>
+            <div className="flex items-center space-x-3 mb-4">
+              <div className="bg-green-600 p-3 rounded-full">
+                <Award className="text-white" size={24} />
+              </div>
+              <div>
+                <h3 className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} font-semibold`}>Certificaciones</h3>
+                <p className="text-green-600 text-2xl font-bold">3</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} p-6 rounded-lg shadow-lg`}>
+          <h3 className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-xl font-semibold mb-4`}>
+            Progreso por Categoría
+          </h3>
+          <div className="space-y-4">
+            {categories.slice(0, 5).map((category, index) => (
+              <div key={category.id}>
+                <div className="flex justify-between items-center mb-2">
+                  <span className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} font-medium`}>
+                    {category.name}
+                  </span>
+                  <span className="text-[#C5A95E] font-semibold">
+                    {Math.floor(Math.random() * 100)}%
+                  </span>
+                </div>
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                  <div 
+                    className="bg-[#C5A95E] h-2 rounded-full transition-all duration-1000"
+                    style={{ width: `${Math.floor(Math.random() * 100)}%` }}
+                  ></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  );
+
+  // Courses View Component
+  const CoursesView = () => (
+    <div className="container mx-auto px-4 py-8">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
+        <h1 className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-3xl font-bold mb-8`}>
+          Todos los Cursos
+        </h1>
+
+        <SearchAndFilter />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {getFilteredVideos().map((video, index) => (
+            <VideoCard 
+              key={video.id} 
+              video={video} 
+              category={{ name: video.categoryName }} 
+              index={index}
+            />
+          ))}
+        </div>
+      </motion.div>
+    </div>
+  );
+
+  // Enhanced Dashboard with view management
   const Dashboard = () => {
     const filteredVideos = getFilteredVideos();
     const groupedVideos = searchQuery || filterCategory !== 'all' ? 
@@ -991,45 +1489,175 @@ function App() {
         return acc;
       }, {});
 
+    const renderCurrentView = () => {
+      switch (currentView) {
+        case 'courses':
+          return <CoursesView />;
+        case 'progress':
+          return <ProgressView />;
+        default:
+          return (
+            <>
+              {/* Hero Section */}
+              <motion.section 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="relative h-96 bg-cover bg-center flex items-center"
+                style={{
+                  backgroundImage: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url(${customization.heroBanner})`
+                }}
+              >
+                <div className="container mx-auto px-4">
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className="max-w-2xl"
+                  >
+                    <h2 className="text-white text-5xl font-bold mb-4 hero-text">
+                      Capacitación Inmobiliaria Profesional
+                    </h2>
+                    <p className="text-gray-300 text-lg mb-6">
+                      Domina el mercado inmobiliario con nuestros cursos especializados. 
+                      Aprende técnicas avanzadas, estrategias de venta y tendencias del sector.
+                    </p>
+                    <div className="flex space-x-4">
+                      <motion.button 
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="bg-white text-black px-8 py-3 rounded-full font-semibold hover:bg-gray-200 flex items-center space-x-2 shadow-lg"
+                      >
+                        <Play size={20} />
+                        <span>Comenzar Ahora</span>
+                      </motion.button>
+                      <motion.button 
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="bg-gray-600 bg-opacity-50 text-white px-8 py-3 rounded-full font-semibold hover:bg-opacity-70 flex items-center space-x-2 backdrop-blur-sm"
+                      >
+                        <Info size={20} />
+                        <span>Más Información</span>
+                      </motion.button>
+                    </div>
+                  </motion.div>
+                </div>
+              </motion.section>
+
+              {/* Search and Filter Section */}
+              <div className="container mx-auto px-4 py-8">
+                <SearchAndFilter />
+              </div>
+
+              {/* Content Sections */}
+              <div className="container mx-auto px-4 pb-12 space-y-12">
+                {Object.entries(groupedVideos).map(([sectionName, videos], sectionIndex) => (
+                  <motion.section
+                    key={sectionName}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: sectionIndex * 0.1 }}
+                  >
+                    <div className="flex items-center space-x-3 mb-6">
+                      {sectionName !== 'Resultados de Búsqueda' && (
+                        <motion.div
+                          whileHover={{ rotate: 15 }}
+                          className="text-[#C5A95E]"
+                        >
+                          {categories.find(cat => cat.name === sectionName)?.icon && 
+                            React.createElement(categories.find(cat => cat.name === sectionName).icon, { size: 28 })}
+                        </motion.div>
+                      )}
+                      <h3 className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-2xl font-bold`}>
+                        {sectionName}
+                      </h3>
+                      {videos.length > 0 && (
+                        <span className={`${theme === 'dark' ? 'text-gray-500' : 'text-gray-600'} text-sm`}>
+                          ({videos.length} video{videos.length !== 1 ? 's' : ''})
+                        </span>
+                      )}
+                    </div>
+                    
+                    {videos.length > 0 ? (
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+                        {videos.map((video, index) => (
+                          <VideoCard 
+                            key={video.id} 
+                            video={video} 
+                            category={{ name: video.categoryName }} 
+                            index={index}
+                          />
+                        ))}
+                      </div>
+                    ) : (
+                      <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className={`text-center py-12 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-600'}`}
+                      >
+                        <Search size={48} className="mx-auto mb-4 opacity-50" />
+                        <p>No se encontraron videos que coincidan con tu búsqueda.</p>
+                      </motion.div>
+                    )}
+                  </motion.section>
+                ))}
+              </div>
+            </>
+          );
+      }
+    };
+
     return (
       <div className={`min-h-screen pb-20 lg:pb-0 transition-colors duration-300 ${theme === 'dark' ? 'bg-black' : 'bg-gray-50'}`}>
         {/* Enhanced Header */}
         <header className={`relative z-40 ${theme === 'dark' ? 'bg-black bg-opacity-50' : 'bg-white bg-opacity-90'} backdrop-blur-sm border-b ${theme === 'dark' ? 'border-gray-800' : 'border-gray-200'}`}>
           <div className="container mx-auto px-4 py-4 flex items-center justify-between">
             <div className="flex items-center space-x-8">
-              <motion.h1 
+              <motion.div 
                 whileHover={{ scale: 1.05 }}
-                className="text-[#C5A95E] text-2xl font-bold cursor-pointer"
+                className="cursor-pointer flex items-center space-x-3"
+                onClick={() => setCurrentView('home')}
               >
-                {customization.companyName}
-              </motion.h1>
+                {customization.logo ? (
+                  <img 
+                    src={customization.logo} 
+                    alt={customization.companyName}
+                    className="h-8 object-contain"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'block';
+                    }}
+                  />
+                ) : null}
+                <h1 className={`text-[#C5A95E] text-2xl font-bold ${customization.logo ? 'hidden' : 'block'}`}>
+                  {customization.companyName}
+                </h1>
+              </motion.div>
               <nav className="hidden md:flex space-x-6">
-                <motion.a 
-                  href="#" 
+                <motion.button 
+                  onClick={() => setCurrentView('home')}
                   whileHover={{ scale: 1.05 }}
-                  className={`${theme === 'dark' ? 'text-white hover:text-[#C5A95E]' : 'text-gray-900 hover:text-[#C5A95E]'} transition`}
+                  className={`${currentView === 'home' ? 'text-[#C5A95E]' : theme === 'dark' ? 'text-white hover:text-[#C5A95E]' : 'text-gray-900 hover:text-[#C5A95E]'} transition`}
                 >
                   Inicio
-                </motion.a>
-                <motion.a 
-                  href="#" 
+                </motion.button>
+                <motion.button 
+                  onClick={() => setCurrentView('courses')}
                   whileHover={{ scale: 1.05 }}
-                  className={`${theme === 'dark' ? 'text-white hover:text-[#C5A95E]' : 'text-gray-900 hover:text-[#C5A95E]'} transition`}
+                  className={`${currentView === 'courses' ? 'text-[#C5A95E]' : theme === 'dark' ? 'text-white hover:text-[#C5A95E]' : 'text-gray-900 hover:text-[#C5A95E]'} transition`}
                 >
                   Cursos
-                </motion.a>
-                <motion.a 
-                  href="#" 
+                </motion.button>
+                <motion.button 
+                  onClick={() => setCurrentView('progress')}
                   whileHover={{ scale: 1.05 }}
-                  className={`${theme === 'dark' ? 'text-white hover:text-[#C5A95E]' : 'text-gray-900 hover:text-[#C5A95E]'} transition`}
+                  className={`${currentView === 'progress' ? 'text-[#C5A95E]' : theme === 'dark' ? 'text-white hover:text-[#C5A95E]' : 'text-gray-900 hover:text-[#C5A95E]'} transition`}
                 >
                   Mi Progreso
-                </motion.a>
+                </motion.button>
               </nav>
             </div>
             
             <div className="flex items-center space-x-4">
-              {/* Theme Toggle */}
               <motion.button
                 onClick={toggleTheme}
                 whileHover={{ scale: 1.1 }}
@@ -1052,7 +1680,7 @@ function App() {
                 </motion.button>
               )}
               
-              <div className="relative">
+              <div className="relative" ref={userMenuRef}>
                 <motion.button
                   onClick={() => setShowUserMenu(!showUserMenu)}
                   whileHover={{ scale: 1.1 }}
@@ -1060,6 +1688,7 @@ function App() {
                   className={`flex items-center space-x-2 ${theme === 'dark' ? 'text-white hover:text-[#C5A95E]' : 'text-gray-900 hover:text-[#C5A95E]'} transition p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800`}
                 >
                   <User size={24} />
+                  <ChevronDown size={16} />
                 </motion.button>
                 
                 <AnimatePresence>
@@ -1072,10 +1701,13 @@ function App() {
                     >
                       <div className={`p-4 border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
                         <p className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-sm font-semibold`}>
-                          {userRole === 'admin' ? 'Administrador' : 'Usuario'}
+                          {currentUser?.name || 'Usuario'}
                         </p>
                         <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} text-xs`}>
-                          {email}
+                          {currentUser?.role === 'admin' ? 'Administrador' : 'Usuario'}
+                        </p>
+                        <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} text-xs`}>
+                          {currentUser?.email}
                         </p>
                       </div>
                       <motion.button
@@ -1094,114 +1726,15 @@ function App() {
           </div>
         </header>
 
-        {/* Enhanced Hero Section */}
-        <motion.section 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="relative h-96 bg-cover bg-center flex items-center"
-          style={{
-            backgroundImage: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url(${customization.heroBanner})`
-          }}
-        >
-          <div className="container mx-auto px-4">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="max-w-2xl"
-            >
-              <h2 className="text-white text-5xl font-bold mb-4 hero-text">
-                Capacitación Inmobiliaria Profesional
-              </h2>
-              <p className="text-gray-300 text-lg mb-6">
-                Domina el mercado inmobiliario con nuestros cursos especializados. 
-                Aprende técnicas avanzadas, estrategias de venta y tendencias del sector.
-              </p>
-              <div className="flex space-x-4">
-                <motion.button 
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="bg-white text-black px-8 py-3 rounded-full font-semibold hover:bg-gray-200 flex items-center space-x-2 shadow-lg"
-                >
-                  <Play size={20} />
-                  <span>Comenzar Ahora</span>
-                </motion.button>
-                <motion.button 
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="bg-gray-600 bg-opacity-50 text-white px-8 py-3 rounded-full font-semibold hover:bg-opacity-70 flex items-center space-x-2 backdrop-blur-sm"
-                >
-                  <Info size={20} />
-                  <span>Más Información</span>
-                </motion.button>
-              </div>
-            </motion.div>
-          </div>
-        </motion.section>
-
-        {/* Search and Filter Section */}
-        <div className="container mx-auto px-4 py-8">
-          <SearchAndFilter />
-        </div>
-
-        {/* Enhanced Content Sections */}
-        <div className="container mx-auto px-4 pb-12 space-y-12">
-          {Object.entries(groupedVideos).map(([sectionName, videos], sectionIndex) => (
-            <motion.section
-              key={sectionName}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: sectionIndex * 0.1 }}
-            >
-              <div className="flex items-center space-x-3 mb-6">
-                {sectionName !== 'Resultados de Búsqueda' && (
-                  <motion.div
-                    whileHover={{ rotate: 15 }}
-                    className="text-[#C5A95E]"
-                  >
-                    {categories.find(cat => cat.name === sectionName)?.icon && 
-                      React.createElement(categories.find(cat => cat.name === sectionName).icon, { size: 28 })}
-                  </motion.div>
-                )}
-                <h3 className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-2xl font-bold`}>
-                  {sectionName}
-                </h3>
-                {videos.length > 0 && (
-                  <span className={`${theme === 'dark' ? 'text-gray-500' : 'text-gray-600'} text-sm`}>
-                    ({videos.length} video{videos.length !== 1 ? 's' : ''})
-                  </span>
-                )}
-              </div>
-              
-              {videos.length > 0 ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-                  {videos.map((video, index) => (
-                    <VideoCard 
-                      key={video.id} 
-                      video={video} 
-                      category={{ name: video.categoryName }} 
-                      index={index}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <motion.div 
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className={`text-center py-12 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-600'}`}
-                >
-                  <Search size={48} className="mx-auto mb-4 opacity-50" />
-                  <p>No se encontraron videos que coincidan con tu búsqueda.</p>
-                </motion.div>
-              )}
-            </motion.section>
-          ))}
-        </div>
+        {/* Dynamic Content */}
+        {renderCurrentView()}
 
         {/* Enhanced Modals */}
         <VideoPlayerModal />
         <InfoModal />
         <AdminPanel />
+        <UserManagementModal />
+        <VideoUploadModal />
         <MobileBottomNav />
       </div>
     );
