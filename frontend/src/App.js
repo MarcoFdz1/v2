@@ -593,7 +593,8 @@ function App() {
             {userRole === 'admin' && (
               <button
                 onClick={() => setShowAdminPanel(true)}
-                className="text-white hover:text-[#C5A95E] transition"
+                className="text-white hover:text-[#C5A95E] transition p-2 rounded-full hover:bg-gray-800"
+                title="Panel de Administración"
               >
                 <Settings size={24} />
               </button>
