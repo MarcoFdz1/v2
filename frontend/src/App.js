@@ -1149,129 +1149,224 @@ function App() {
   };
 
   // Video Upload Modal
-  const VideoUploadModal = () => (
-    <AnimatePresence>
-      {showVideoUpload && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4"
-          onClick={() => setShowVideoUpload(false)}
-        >
+  const VideoUploadModal = () => {
+    const [newVideo, setNewVideo] = useState({
+      title: '',
+      description: '',
+      categoryId: categories[0]?.id || 1,
+      difficulty: 'Principiante',
+      videoUrl: '',
+      thumbnail: '',
+      duration: ''
+    });
+
+    const extractYouTubeId = (url) => {
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+      const match = url.match(regExp);
+      return (match && match[2].length === 11) ? match[2] : null;
+    };
+
+    const handleUploadVideo = () => {
+      if (!newVideo.title || !newVideo.videoUrl) {
+        alert('Por favor complete título y URL del video');
+        return;
+      }
+
+      const youtubeId = extractYouTubeId(newVideo.videoUrl);
+      if (!youtubeId) {
+        alert('Por favor ingrese una URL válida de YouTube');
+        return;
+      }
+
+      const video = {
+        id: Date.now(),
+        title: newVideo.title,
+        description: newVideo.description,
+        thumbnail: newVideo.thumbnail || `https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`,
+        duration: newVideo.duration || '45 min',
+        youtubeId: youtubeId,
+        match: '95%',
+        difficulty: newVideo.difficulty,
+        rating: 4.5,
+        views: 0,
+        releaseDate: new Date().toISOString().split('T')[0]
+      };
+
+      const updatedCategories = categories.map(category => 
+        category.id === parseInt(newVideo.categoryId) 
+          ? { ...category, videos: [...category.videos, video] }
+          : category
+      );
+
+      setCategories(updatedCategories);
+      localStorage.setItem('netflixRealEstateCategories', JSON.stringify(updatedCategories));
+      
+      setNewVideo({
+        title: '',
+        description: '',
+        categoryId: categories[0]?.id || 1,
+        difficulty: 'Principiante',
+        videoUrl: '',
+        thumbnail: '',
+        duration: ''
+      });
+      
+      alert('Video subido exitosamente');
+      setShowVideoUpload(false);
+    };
+
+    return (
+      <AnimatePresence>
+        {showVideoUpload && (
           <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.8, opacity: 0 }}
-            className="relative w-full max-w-2xl"
-            onClick={(e) => e.stopPropagation()}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4"
+            onClick={() => setShowVideoUpload(false)}
           >
-            <div className={`${theme === 'dark' ? 'bg-gray-900' : 'bg-white'} rounded-lg shadow-2xl`}>
-              <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-                <h2 className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-2xl font-bold`}>
-                  Subir Nuevo Video
-                </h2>
-                <button
-                  onClick={() => setShowVideoUpload(false)}
-                  className={`${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition`}
-                >
-                  <X size={24} />
-                </button>
-              </div>
-
-              <div className="p-6 space-y-4">
-                <div>
-                  <label className={`block ${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-sm font-medium mb-2`}>
-                    Título del Video
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Ingrese el título del video"
-                    className={`w-full p-3 ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded-lg border focus:border-[#C5A95E] focus:outline-none`}
-                  />
-                </div>
-
-                <div>
-                  <label className={`block ${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-sm font-medium mb-2`}>
-                    Descripción
-                  </label>
-                  <textarea
-                    rows="3"
-                    placeholder="Descripción del video..."
-                    className={`w-full p-3 ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded-lg border focus:border-[#C5A95E] focus:outline-none resize-none`}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className={`block ${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-sm font-medium mb-2`}>
-                      Categoría
-                    </label>
-                    <select className={`w-full p-3 ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded-lg border focus:border-[#C5A95E] focus:outline-none`}>
-                      {categories.map(category => (
-                        <option key={category.id} value={category.id}>{category.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className={`block ${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-sm font-medium mb-2`}>
-                      Dificultad
-                    </label>
-                    <select className={`w-full p-3 ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded-lg border focus:border-[#C5A95E] focus:outline-none`}>
-                      <option value="Principiante">Principiante</option>
-                      <option value="Intermedio">Intermedio</option>
-                      <option value="Avanzado">Avanzado</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label className={`block ${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-sm font-medium mb-2`}>
-                    URL del Video (YouTube/Vimeo)
-                  </label>
-                  <input
-                    type="url"
-                    placeholder="https://youtube.com/watch?v=..."
-                    className={`w-full p-3 ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded-lg border focus:border-[#C5A95E] focus:outline-none`}
-                  />
-                </div>
-
-                <div>
-                  <label className={`block ${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-sm font-medium mb-2`}>
-                    URL de Miniatura
-                  </label>
-                  <input
-                    type="url"
-                    placeholder="https://ejemplo.com/miniatura.jpg"
-                    className={`w-full p-3 ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded-lg border focus:border-[#C5A95E] focus:outline-none`}
-                  />
-                </div>
-
-                <div className="flex space-x-4 pt-4">
-                  <button
-                    onClick={() => {
-                      alert('Video subido exitosamente (funcionalidad simulada)');
-                      setShowVideoUpload(false);
-                    }}
-                    className="flex-1 bg-[#C5A95E] text-black py-3 rounded-lg font-semibold hover:bg-[#B8A055] transition flex items-center justify-center space-x-2"
-                  >
-                    <Upload size={20} />
-                    <span>Subir Video</span>
-                  </button>
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className={`${theme === 'dark' ? 'bg-gray-900' : 'bg-white'} rounded-lg shadow-2xl`}>
+                <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+                  <h2 className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-xl font-bold`}>
+                    Subir Nuevo Video
+                  </h2>
                   <button
                     onClick={() => setShowVideoUpload(false)}
-                    className="px-6 py-3 bg-gray-600 text-white rounded-lg font-semibold hover:bg-gray-700 transition"
+                    className={`${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition`}
                   >
-                    Cancelar
+                    <X size={20} />
                   </button>
                 </div>
+
+                <div className="p-4 space-y-3">
+                  <div>
+                    <label className={`block ${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-sm font-medium mb-1`}>
+                      Título del Video
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Ingrese el título del video"
+                      value={newVideo.title}
+                      onChange={(e) => setNewVideo({...newVideo, title: e.target.value})}
+                      className={`w-full p-2 text-sm ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded-lg border focus:border-[#C5A95E] focus:outline-none`}
+                    />
+                  </div>
+
+                  <div>
+                    <label className={`block ${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-sm font-medium mb-1`}>
+                      Descripción
+                    </label>
+                    <textarea
+                      rows="2"
+                      placeholder="Descripción del video..."
+                      value={newVideo.description}
+                      onChange={(e) => setNewVideo({...newVideo, description: e.target.value})}
+                      className={`w-full p-2 text-sm ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded-lg border focus:border-[#C5A95E] focus:outline-none resize-none`}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className={`block ${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-sm font-medium mb-1`}>
+                        Categoría
+                      </label>
+                      <select 
+                        value={newVideo.categoryId}
+                        onChange={(e) => setNewVideo({...newVideo, categoryId: e.target.value})}
+                        className={`w-full p-2 text-sm ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded-lg border focus:border-[#C5A95E] focus:outline-none`}
+                      >
+                        <option value="banner">Banner Principal</option>
+                        {categories.map(category => (
+                          <option key={category.id} value={category.id}>{category.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className={`block ${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-sm font-medium mb-1`}>
+                        Dificultad
+                      </label>
+                      <select 
+                        value={newVideo.difficulty}
+                        onChange={(e) => setNewVideo({...newVideo, difficulty: e.target.value})}
+                        className={`w-full p-2 text-sm ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded-lg border focus:border-[#C5A95E] focus:outline-none`}
+                      >
+                        <option value="Principiante">Principiante</option>
+                        <option value="Intermedio">Intermedio</option>
+                        <option value="Avanzado">Avanzado</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className={`block ${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-sm font-medium mb-1`}>
+                      URL del Video (YouTube)
+                    </label>
+                    <input
+                      type="url"
+                      placeholder="https://youtube.com/watch?v=..."
+                      value={newVideo.videoUrl}
+                      onChange={(e) => setNewVideo({...newVideo, videoUrl: e.target.value})}
+                      className={`w-full p-2 text-sm ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded-lg border focus:border-[#C5A95E] focus:outline-none`}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className={`block ${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-sm font-medium mb-1`}>
+                        URL de Miniatura (opcional)
+                      </label>
+                      <input
+                        type="url"
+                        placeholder="https://ejemplo.com/miniatura.jpg"
+                        value={newVideo.thumbnail}
+                        onChange={(e) => setNewVideo({...newVideo, thumbnail: e.target.value})}
+                        className={`w-full p-2 text-sm ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded-lg border focus:border-[#C5A95E] focus:outline-none`}
+                      />
+                    </div>
+                    <div>
+                      <label className={`block ${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-sm font-medium mb-1`}>
+                        Duración
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="45 min"
+                        value={newVideo.duration}
+                        onChange={(e) => setNewVideo({...newVideo, duration: e.target.value})}
+                        className={`w-full p-2 text-sm ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded-lg border focus:border-[#C5A95E] focus:outline-none`}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex space-x-3 pt-3">
+                    <button
+                      onClick={handleUploadVideo}
+                      className="flex-1 bg-[#C5A95E] text-black py-2 px-4 rounded-lg font-semibold hover:bg-[#B8A055] transition flex items-center justify-center space-x-2 text-sm"
+                    >
+                      <Upload size={16} />
+                      <span>Subir Video</span>
+                    </button>
+                    <button
+                      onClick={() => setShowVideoUpload(false)}
+                      className="px-4 py-2 bg-gray-600 text-white rounded-lg font-semibold hover:bg-gray-700 transition text-sm"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </div>
               </div>
-            </div>
+            </motion.div>
           </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
+        )}
+      </AnimatePresence>
+    );
+  };
 
   // Enhanced Admin Panel
   const AdminPanel = () => (
