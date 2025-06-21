@@ -1714,7 +1714,6 @@ function App() {
         default:
           return (
             <>
-              <>
               {/* Hero Section */}
               <motion.section 
                 initial={{ opacity: 0 }}
