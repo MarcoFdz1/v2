@@ -152,11 +152,11 @@ frontend:
 
   - task: "Admin Panel"
     implemented: true
-    working: false
+    working: true
     file: "/app/frontend/src/App.js"
-    stuck_count: 1
+    stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
@@ -167,6 +167,9 @@ frontend:
       - working: false
         agent: "testing"
         comment: "Retested admin panel functionality. The settings icon is visible in the header, but clicking it does not open the admin panel. The admin panel component is defined in the code but appears to have an issue with the event handler or rendering."
+      - working: true
+        agent: "testing"
+        comment: "Admin panel is now working correctly. The settings icon appears in the header after admin login, and clicking it opens the admin panel which slides in from the right side. The panel contains fields for company name, login background URL, and hero banner URL. Changes made in the panel are reflected in the interface. The panel can be closed by clicking the X button in the top-right corner or by clicking the backdrop. The panel also adapts correctly to both dark and light themes."
 
   - task: "User Experience"
     implemented: true
