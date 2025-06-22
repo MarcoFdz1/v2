@@ -984,7 +984,162 @@ function App() {
     </AnimatePresence>
   );
 
-  // User Management Modal
+  // Video Management Modal
+  const VideoManagementModal = () => {
+    const getAllVideosForManagement = () => {
+      const allVideos = [];
+      
+      // Add banner video if exists
+      if (bannerVideo) {
+        allVideos.push({...bannerVideo, categoryName: 'Banner Principal', categoryId: 'banner'});
+      }
+      
+      // Add category videos
+      categories.forEach(category => {
+        category.videos.forEach(video => {
+          allVideos.push({
+            ...video,
+            categoryName: category.name,
+            categoryId: category.id
+          });
+        });
+      });
+      
+      return allVideos;
+    };
+
+    const deleteVideo = (videoId, categoryId) => {
+      if (!window.confirm('¿Está seguro de eliminar este video?')) return;
+
+      if (categoryId === 'banner') {
+        setBannerVideo(null);
+        localStorage.removeItem('netflixRealEstateBannerVideo');
+      } else {
+        const updatedCategories = categories.map(category => 
+          category.id === categoryId 
+            ? { ...category, videos: category.videos.filter(v => v.id !== videoId) }
+            : category
+        );
+        setCategories(updatedCategories);
+        localStorage.setItem('netflixRealEstateCategories', JSON.stringify(updatedCategories));
+      }
+      
+      alert('Video eliminado exitosamente');
+    };
+
+    const editVideo = (video) => {
+      setEditingVideo(video);
+      setShowVideoManagement(false);
+      setShowVideoUpload(true);
+    };
+
+    return (
+      <AnimatePresence>
+        {showVideoManagement && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4"
+            onClick={() => setShowVideoManagement(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              className="relative w-full max-w-6xl max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className={`${theme === 'dark' ? 'bg-gray-900' : 'bg-white'} rounded-lg shadow-2xl`}>
+                <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+                  <h2 className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-2xl font-bold`}>
+                    Gestión de Videos
+                  </h2>
+                  <button
+                    onClick={() => setShowVideoManagement(false)}
+                    className={`${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition`}
+                  >
+                    <X size={24} />
+                  </button>
+                </div>
+
+                <div className="p-6">
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'}`}>
+                          <th className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-left p-3`}>Video</th>
+                          <th className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-left p-3`}>Categoría</th>
+                          <th className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-left p-3`}>Duración</th>
+                          <th className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-left p-3`}>Vistas</th>
+                          <th className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-left p-3`}>Acciones</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {getAllVideosForManagement().map(video => (
+                          <tr key={`${video.categoryId}-${video.id}`} className={`border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
+                            <td className="p-3">
+                              <div className="flex items-center space-x-3">
+                                <img 
+                                  src={video.thumbnail} 
+                                  alt={video.title}
+                                  className="w-16 h-9 object-cover rounded"
+                                />
+                                <div>
+                                  <p className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} font-medium`}>
+                                    {video.title}
+                                  </p>
+                                  <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} text-sm`}>
+                                    {video.description?.substring(0, 50)}...
+                                  </p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'} p-3`}>
+                              <span className={`px-2 py-1 rounded text-xs ${
+                                video.categoryId === 'banner' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
+                                'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+                              }`}>
+                                {video.categoryName}
+                              </span>
+                            </td>
+                            <td className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'} p-3`}>
+                              {video.duration}
+                            </td>
+                            <td className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'} p-3`}>
+                              {video.views}
+                            </td>
+                            <td className="p-3">
+                              <div className="flex space-x-2">
+                                <button
+                                  onClick={() => editVideo(video)}
+                                  className="p-1 rounded text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900 transition"
+                                  title="Editar video"
+                                >
+                                  <Edit size={16} />
+                                </button>
+                                <button
+                                  onClick={() => deleteVideo(video.id, video.categoryId)}
+                                  className="p-1 rounded text-red-600 hover:bg-red-100 dark:hover:bg-red-900 transition"
+                                  title="Eliminar video"
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    );
+  };
   const UserManagementModal = () => {
     const [localNewUser, setLocalNewUser] = useState({
       name: '',
