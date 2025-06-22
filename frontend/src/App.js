@@ -1940,7 +1940,9 @@ function App() {
                 animate={{ opacity: 1 }}
                 className="relative h-96 bg-cover bg-center flex items-center"
                 style={{
-                  backgroundImage: `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url(${customization.heroBanner})`
+                  backgroundImage: bannerVideo ? 
+                    `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url(${bannerVideo.thumbnail})` :
+                    `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url(${customization.heroBanner})`
                 }}
               >
                 <div className="container mx-auto px-4">
@@ -1951,22 +1953,23 @@ function App() {
                     className="max-w-2xl"
                   >
                     <h2 className="text-white text-5xl font-bold mb-4 hero-text">
-                      Capacitación Inmobiliaria Profesional
+                      {bannerVideo ? bannerVideo.title : 'Capacitación Inmobiliaria Profesional'}
                     </h2>
                     <p className="text-gray-300 text-lg mb-6">
-                      Domina el mercado inmobiliario con nuestros cursos especializados. 
-                      Aprende técnicas avanzadas, estrategias de venta y tendencias del sector.
+                      {bannerVideo ? bannerVideo.description : 'Domina el mercado inmobiliario con nuestros cursos especializados. Aprende técnicas avanzadas, estrategias de venta y tendencias del sector.'}
                     </p>
                     <div className="flex space-x-4">
                       <motion.button 
+                        onClick={() => bannerVideo ? playVideo(bannerVideo) : null}
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         className="bg-white text-black px-8 py-3 rounded-full font-semibold hover:bg-gray-200 flex items-center space-x-2 shadow-lg"
                       >
                         <Play size={20} />
-                        <span>Comenzar Ahora</span>
+                        <span>{bannerVideo ? 'Reproducir Video' : 'Comenzar Ahora'}</span>
                       </motion.button>
                       <motion.button 
+                        onClick={() => bannerVideo ? showMoreInfo(bannerVideo) : null}
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         className="bg-gray-600 bg-opacity-50 text-white px-8 py-3 rounded-full font-semibold hover:bg-opacity-70 flex items-center space-x-2 backdrop-blur-sm"
