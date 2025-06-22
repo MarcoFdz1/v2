@@ -265,6 +265,10 @@ function App() {
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [showVideoUpload, setShowVideoUpload] = useState(false);
   const [showUserManagement, setShowUserManagement] = useState(false);
+  const [showVideoManagement, setShowVideoManagement] = useState(false);
+  const [editingCategory, setEditingCategory] = useState(null);
+  const [editingVideo, setEditingVideo] = useState(null);
+  const [bannerVideo, setBannerVideo] = useState(null);
   const [currentView, setCurrentView] = useState('home'); // home, courses, progress
   const [theme, setTheme] = useState('dark');
   const [searchQuery, setSearchQuery] = useState('');
