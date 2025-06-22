@@ -696,16 +696,18 @@ function App() {
 
     const handleSubmit = (e) => {
       e.preventDefault();
-      setEmail(localEmail);
-      setPassword(localPassword);
+      console.log('Login attempt:', localEmail, localPassword);
+      console.log('Available users:', users);
       
-      // Use main handleLogin function
       const user = users.find(u => u.email === localEmail && u.password === localPassword && u.isActive);
       
       if (user) {
+        console.log('User found:', user);
         setCurrentUser(user);
         setUserRole(user.role);
         setIsAuthenticated(true);
+        setEmail(localEmail);
+        setPassword(localPassword);
         
         // Update last login
         const updatedUsers = users.map(u => 
@@ -713,6 +715,7 @@ function App() {
         );
         saveUsers(updatedUsers);
       } else {
+        console.log('Login failed - user not found or inactive');
         alert('Credenciales incorrectas o usuario inactivo');
       }
     };
