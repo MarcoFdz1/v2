@@ -269,7 +269,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Admin Panel"
+    - "Fixed Login Functionality"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
