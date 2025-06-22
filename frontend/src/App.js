@@ -1572,8 +1572,20 @@ function App() {
       alert('Categoría agregada exitosamente');
     };
 
+    const editCategory = (category) => {
+      const newName = prompt('Nuevo nombre para la categoría:', category.name);
+      if (newName && newName.trim() && newName !== category.name) {
+        const updatedCategories = categories.map(c => 
+          c.id === category.id ? { ...c, name: newName.trim() } : c
+        );
+        setCategories(updatedCategories);
+        localStorage.setItem('netflixRealEstateCategories', JSON.stringify(updatedCategories));
+        alert('Categoría actualizada exitosamente');
+      }
+    };
+
     const deleteCategory = (categoryId) => {
-      if (window.confirm('¿Está seguro de eliminar esta categoría?')) {
+      if (window.confirm('¿Está seguro de eliminar esta categoría y todos sus videos?')) {
         const updatedCategories = categories.filter(c => c.id !== categoryId);
         setCategories(updatedCategories);
         localStorage.setItem('netflixRealEstateCategories', JSON.stringify(updatedCategories));
@@ -1636,6 +1648,28 @@ function App() {
                           type="text"
                           defaultValue={customization.companyName}
                           onBlur={(e) => saveCustomization({...customization, companyName: e.target.value})}
+                          className={`w-full p-2 text-xs ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded border focus:border-[#C5A95E] focus:outline-none transition-colors`}
+                        />
+                      </div>
+                      <div>
+                        <label className={`block ${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-xs mb-1`}>
+                          Título del Login
+                        </label>
+                        <input
+                          type="text"
+                          defaultValue={customization.loginTitle}
+                          onBlur={(e) => saveCustomization({...customization, loginTitle: e.target.value})}
+                          className={`w-full p-2 text-xs ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded border focus:border-[#C5A95E] focus:outline-none transition-colors`}
+                        />
+                      </div>
+                      <div>
+                        <label className={`block ${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-xs mb-1`}>
+                          Subtítulo del Login
+                        </label>
+                        <input
+                          type="text"
+                          defaultValue={customization.loginSubtitle}
+                          onBlur={(e) => saveCustomization({...customization, loginSubtitle: e.target.value})}
                           className={`w-full p-2 text-xs ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded border focus:border-[#C5A95E] focus:outline-none transition-colors`}
                         />
                       </div>
@@ -1713,6 +1747,7 @@ function App() {
                             <motion.button 
                               whileHover={{ scale: 1.1 }}
                               whileTap={{ scale: 0.9 }}
+                              onClick={() => editCategory(category)}
                               className={`${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} p-1 rounded hover:bg-gray-700 dark:hover:bg-gray-600 transition`}
                               title="Editar categoría"
                             >
@@ -1739,16 +1774,26 @@ function App() {
                       onClick={() => setShowVideoUpload(true)}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className="w-full bg-[#C5A95E] text-black py-2 rounded font-semibold hover:bg-[#B8A055] flex items-center justify-center space-x-2 transition text-sm"
+                      className="w-full bg-[#C5A95E] text-black py-2 rounded font-semibold hover:bg-[#B8A055] flex items-center justify-center space-x-2 transition text-sm mb-2"
                     >
                       <Upload size={14} />
                       <span>Subir Nuevo Video</span>
+                    </motion.button>
+                    
+                    <motion.button 
+                      onClick={() => setShowVideoManagement(true)}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="w-full bg-purple-600 text-white py-2 rounded font-semibold hover:bg-purple-700 flex items-center justify-center space-x-2 transition text-sm"
+                    >
+                      <Edit size={14} />
+                      <span>Gestionar Videos</span>
                     </motion.button>
                   </div>
 
                   <div className={`pt-3 border-t ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>
                     <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} text-xs text-center`}>
-                      Panel de Administración - v2.0
+                      Panel de Administración - v3.0
                     </p>
                   </div>
                 </div>
