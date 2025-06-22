@@ -1207,14 +1207,19 @@ function App() {
         releaseDate: new Date().toISOString().split('T')[0]
       };
 
-      const updatedCategories = categories.map(category => 
-        category.id === parseInt(newVideo.categoryId) 
-          ? { ...category, videos: [...category.videos, video] }
-          : category
-      );
-
-      setCategories(updatedCategories);
-      localStorage.setItem('netflixRealEstateCategories', JSON.stringify(updatedCategories));
+      // Handle banner video separately
+      if (newVideo.categoryId === 'banner') {
+        setBannerVideo(video);
+        localStorage.setItem('netflixRealEstateBannerVideo', JSON.stringify(video));
+      } else {
+        const updatedCategories = categories.map(category => 
+          category.id === parseInt(newVideo.categoryId) 
+            ? { ...category, videos: [...category.videos, video] }
+            : category
+        );
+        setCategories(updatedCategories);
+        localStorage.setItem('netflixRealEstateCategories', JSON.stringify(updatedCategories));
+      }
       
       setNewVideo({
         title: '',
