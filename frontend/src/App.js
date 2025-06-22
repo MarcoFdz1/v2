@@ -696,14 +696,16 @@ function App() {
 
     const handleSubmit = (e) => {
       e.preventDefault();
+      setEmail(localEmail);
+      setPassword(localPassword);
+      
+      // Use main handleLogin function
       const user = users.find(u => u.email === localEmail && u.password === localPassword && u.isActive);
       
       if (user) {
         setCurrentUser(user);
         setUserRole(user.role);
         setIsAuthenticated(true);
-        setEmail(localEmail);
-        setPassword(localPassword);
         
         // Update last login
         const updatedUsers = users.map(u => 
