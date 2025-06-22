@@ -739,8 +739,13 @@ function App() {
               {customization.companyName}
             </h1>
             <p className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-              Plataforma de Capacitación Inmobiliaria
+              {customization.loginTitle}
             </p>
+            {customization.loginSubtitle && (
+              <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} text-sm mt-2`}>
+                {customization.loginSubtitle}
+              </p>
+            )}
           </div>
           
           <form onSubmit={handleSubmit} className="space-y-6">
