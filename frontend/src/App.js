@@ -419,9 +419,13 @@ function App() {
 
   const handleLogin = (e) => {
     e.preventDefault();
+    console.log('Login attempt:', email, password); // Debug log
+    console.log('Available users:', users); // Debug log
+    
     const user = users.find(u => u.email === email && u.password === password && u.isActive);
     
     if (user) {
+      console.log('User found:', user); // Debug log
       setCurrentUser(user);
       setUserRole(user.role);
       setIsAuthenticated(true);
@@ -432,6 +436,7 @@ function App() {
       );
       saveUsers(updatedUsers);
     } else {
+      console.log('Login failed - user not found or inactive'); // Debug log
       alert('Credenciales incorrectas o usuario inactivo');
     }
   };
