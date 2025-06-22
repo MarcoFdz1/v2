@@ -2178,6 +2178,7 @@ function App() {
         <AdminPanel />
         <UserManagementModal />
         <VideoUploadModal />
+        <VideoManagementModal />
         <MobileBottomNav />
       </div>
     );
