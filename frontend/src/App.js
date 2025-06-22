@@ -314,6 +314,7 @@ function App() {
     const savedTheme = localStorage.getItem('netflixRealEstateTheme');
     const savedUsers = localStorage.getItem('netflixRealEstateUsers');
     const savedCategories = localStorage.getItem('netflixRealEstateCategories');
+    const savedBannerVideo = localStorage.getItem('netflixRealEstateBannerVideo');
     
     if (savedCustomization) {
       setCustomization(JSON.parse(savedCustomization));
@@ -326,6 +327,9 @@ function App() {
     }
     if (savedCategories) {
       setCategories(JSON.parse(savedCategories));
+    }
+    if (savedBannerVideo) {
+      setBannerVideo(JSON.parse(savedBannerVideo));
     }
 
     // Simulate loading
