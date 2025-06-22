@@ -284,7 +284,7 @@ function App() {
       role: 'admin',
       name: 'Administrador',
       createdAt: '2024-01-01',
-      lastLogin: '2024-03-15',
+      lastLogin: null,
       isActive: true
     }
   ]);
