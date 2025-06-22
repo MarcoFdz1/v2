@@ -332,8 +332,8 @@ function App() {
       setBannerVideo(JSON.parse(savedBannerVideo));
     }
 
-    // Simulate loading
-    setTimeout(() => setIsLoading(false), 1500);
+    // Set loading to false immediately
+    setIsLoading(false);
   }, []);
 
   // Close user menu when clicking outside
