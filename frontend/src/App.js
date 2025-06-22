@@ -1335,6 +1335,31 @@ function App() {
       duration: ''
     });
 
+    // Load editing video data when modal opens
+    useEffect(() => {
+      if (editingVideo) {
+        setNewVideo({
+          title: editingVideo.title,
+          description: editingVideo.description,
+          categoryId: editingVideo.categoryId,
+          difficulty: editingVideo.difficulty,
+          videoUrl: `https://youtube.com/watch?v=${editingVideo.youtubeId}`,
+          thumbnail: editingVideo.thumbnail,
+          duration: editingVideo.duration
+        });
+      } else {
+        setNewVideo({
+          title: '',
+          description: '',
+          categoryId: categories[0]?.id || 1,
+          difficulty: 'Principiante',
+          videoUrl: '',
+          thumbnail: '',
+          duration: ''
+        });
+      }
+    }, [editingVideo, showVideoUpload]);
+
     const extractYouTubeId = (url) => {
       const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
       const match = url.match(regExp);
@@ -1354,44 +1379,57 @@ function App() {
       }
 
       const video = {
-        id: Date.now(),
+        id: editingVideo ? editingVideo.id : Date.now(),
         title: newVideo.title,
         description: newVideo.description,
         thumbnail: newVideo.thumbnail || `https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`,
         duration: newVideo.duration || '45 min',
         youtubeId: youtubeId,
-        match: '95%',
+        match: editingVideo ? editingVideo.match : '95%',
         difficulty: newVideo.difficulty,
-        rating: 4.5,
-        views: 0,
-        releaseDate: new Date().toISOString().split('T')[0]
+        rating: editingVideo ? editingVideo.rating : 4.5,
+        views: editingVideo ? editingVideo.views : 0,
+        releaseDate: editingVideo ? editingVideo.releaseDate : new Date().toISOString().split('T')[0]
       };
 
-      // Handle banner video separately
-      if (newVideo.categoryId === 'banner') {
-        setBannerVideo(video);
-        localStorage.setItem('netflixRealEstateBannerVideo', JSON.stringify(video));
+      if (editingVideo) {
+        // Update existing video
+        if (editingVideo.categoryId === 'banner') {
+          setBannerVideo(video);
+          localStorage.setItem('netflixRealEstateBannerVideo', JSON.stringify(video));
+        } else {
+          const updatedCategories = categories.map(category => 
+            category.id === editingVideo.categoryId 
+              ? { ...category, videos: category.videos.map(v => v.id === editingVideo.id ? video : v) }
+              : category
+          );
+          setCategories(updatedCategories);
+          localStorage.setItem('netflixRealEstateCategories', JSON.stringify(updatedCategories));
+        }
+        alert('Video actualizado exitosamente');
       } else {
-        const updatedCategories = categories.map(category => 
-          category.id === parseInt(newVideo.categoryId) 
-            ? { ...category, videos: [...category.videos, video] }
-            : category
-        );
-        setCategories(updatedCategories);
-        localStorage.setItem('netflixRealEstateCategories', JSON.stringify(updatedCategories));
+        // Create new video
+        if (newVideo.categoryId === 'banner') {
+          setBannerVideo(video);
+          localStorage.setItem('netflixRealEstateBannerVideo', JSON.stringify(video));
+        } else {
+          const updatedCategories = categories.map(category => 
+            category.id === parseInt(newVideo.categoryId) 
+              ? { ...category, videos: [...category.videos, video] }
+              : category
+          );
+          setCategories(updatedCategories);
+          localStorage.setItem('netflixRealEstateCategories', JSON.stringify(updatedCategories));
+        }
+        alert('Video subido exitosamente');
       }
       
-      setNewVideo({
-        title: '',
-        description: '',
-        categoryId: categories[0]?.id || 1,
-        difficulty: 'Principiante',
-        videoUrl: '',
-        thumbnail: '',
-        duration: ''
-      });
-      
-      alert('Video subido exitosamente');
+      setEditingVideo(null);
+      setShowVideoUpload(false);
+    };
+
+    const handleCloseModal = () => {
+      setEditingVideo(null);
       setShowVideoUpload(false);
     };
 
@@ -1403,7 +1441,7 @@ function App() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4"
-            onClick={() => setShowVideoUpload(false)}
+            onClick={handleCloseModal}
           >
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
@@ -1415,10 +1453,10 @@ function App() {
               <div className={`${theme === 'dark' ? 'bg-gray-900' : 'bg-white'} rounded-lg shadow-2xl`}>
                 <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
                   <h2 className={`${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-xl font-bold`}>
-                    Subir Nuevo Video
+                    {editingVideo ? 'Editar Video' : 'Subir Nuevo Video'}
                   </h2>
                   <button
-                    onClick={() => setShowVideoUpload(false)}
+                    onClick={handleCloseModal}
                     className={`${theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'} p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition`}
                   >
                     <X size={20} />
@@ -1461,6 +1499,7 @@ function App() {
                         value={newVideo.categoryId}
                         onChange={(e) => setNewVideo({...newVideo, categoryId: e.target.value})}
                         className={`w-full p-2 text-sm ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded-lg border focus:border-[#C5A95E] focus:outline-none`}
+                        disabled={editingVideo?.categoryId === 'banner'}
                       >
                         <option value="banner">Banner Principal</option>
                         {categories.map(category => (
@@ -1530,10 +1569,10 @@ function App() {
                       className="flex-1 bg-[#C5A95E] text-black py-2 px-4 rounded-lg font-semibold hover:bg-[#B8A055] transition flex items-center justify-center space-x-2 text-sm"
                     >
                       <Upload size={16} />
-                      <span>Subir Video</span>
+                      <span>{editingVideo ? 'Actualizar Video' : 'Subir Video'}</span>
                     </button>
                     <button
-                      onClick={() => setShowVideoUpload(false)}
+                      onClick={handleCloseModal}
                       className="px-4 py-2 bg-gray-600 text-white rounded-lg font-semibold hover:bg-gray-700 transition text-sm"
                     >
                       Cancelar
