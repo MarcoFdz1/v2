@@ -123,11 +123,11 @@ backend:
 frontend:
   - task: "Frontend API Integration"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/frontend/src/App.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
@@ -135,6 +135,9 @@ frontend:
       - working: "NA"
         agent: "main"
         comment: "Successfully integrated frontend with backend APIs. Created apiService.js with all API functions. Modified App.js to use backend APIs for: authentication (login), user management (create/delete users), category management (create/update/delete categories), video management (create/update/delete videos), settings management, and banner video management. Replaced all localStorage calls with proper HTTP requests to backend."
+      - working: true
+        agent: "testing"
+        comment: "Fixed login functionality to use backend API instead of localStorage. Verified API calls are being made to /api/auth/login endpoint. Login with admin credentials works correctly. Only theme preference is stored in localStorage as required. All other data is persisted in MongoDB."
 
 metadata:
   created_by: "main_agent"
