@@ -1087,23 +1087,32 @@ function App() {
       return allVideos;
     };
 
-    const deleteVideo = (videoId, categoryId) => {
+    const deleteVideo = async (videoId, categoryId) => {
       if (!window.confirm('¿Está seguro de eliminar este video?')) return;
 
-      if (categoryId === 'banner') {
-        setBannerVideo(null);
-        localStorage.removeItem('netflixRealEstateBannerVideo');
-      } else {
-        const updatedCategories = categories.map(category => 
-          category.id === categoryId 
-            ? { ...category, videos: category.videos.filter(v => v.id !== videoId) }
-            : category
-        );
-        setCategories(updatedCategories);
-        localStorage.setItem('netflixRealEstateCategories', JSON.stringify(updatedCategories));
+      try {
+        if (categoryId === 'banner') {
+          await bannerVideoAPI.delete();
+          setBannerVideo(null);
+        } else {
+          await videosAPI.delete(videoId);
+          
+          // Refresh categories to get updated data
+          const updatedCategories = await categoriesAPI.getAll();
+          const frontendCategories = updatedCategories.map(category => ({
+            id: parseInt(category.id) || category.id,
+            name: category.name,
+            icon: category.icon,
+            videos: category.videos || []
+          }));
+          setCategories(frontendCategories);
+        }
+        
+        alert('Video eliminado exitosamente');
+      } catch (error) {
+        console.error('Error deleting video:', error);
+        alert('Error al eliminar video: ' + error.message);
       }
-      
-      alert('Video eliminado exitosamente');
     };
 
     const editVideo = (video) => {
