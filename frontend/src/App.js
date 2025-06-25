@@ -390,21 +390,33 @@ function App() {
     };
   }, []);
 
-  // Save settings to localStorage
-  const saveCustomization = (newCustomization) => {
-    setCustomization(newCustomization);
-    localStorage.setItem('netflixRealEstateCustomization', JSON.stringify(newCustomization));
+  // Save settings to backend
+  const saveCustomization = async (newCustomization) => {
+    try {
+      setCustomization(newCustomization);
+      await settingsAPI.update({
+        logoUrl: newCustomization.logoUrl,
+        companyName: newCustomization.companyName,
+        loginBackgroundUrl: newCustomization.loginBackgroundUrl,
+        bannerUrl: newCustomization.bannerUrl,
+        loginTitle: newCustomization.loginTitle,
+        loginSubtitle: newCustomization.loginSubtitle
+      });
+    } catch (error) {
+      console.error('Error saving customization to backend:', error);
+      alert('Error al guardar la configuración');
+    }
   };
 
-  const saveUsers = (newUsers) => {
+  const saveUsers = async (newUsers) => {
     setUsers(newUsers);
-    localStorage.setItem('netflixRealEstateUsers', JSON.stringify(newUsers));
+    // Users are automatically saved when created/deleted via API
   };
 
   const toggleTheme = () => {
     const newTheme = theme === 'dark' ? 'light' : 'dark';
     setTheme(newTheme);
-    localStorage.setItem('netflixRealEstateTheme', newTheme);
+    themeAPI.set(newTheme);
   };
 
   // Get all videos for search and filtering
