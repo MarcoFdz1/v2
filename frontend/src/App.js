@@ -507,42 +507,56 @@ function App() {
     setCurrentView('home');
   };
 
-  const createUser = () => {
+  const createUser = async () => {
     if (!newUser.name || !newUser.email || !newUser.password) {
       alert('Por favor complete todos los campos');
       return;
     }
 
-    if (users.find(u => u.email === newUser.email)) {
-      alert('Ya existe un usuario con este email');
-      return;
+    try {
+      // Use backend API to create user
+      await usersAPI.create({
+        name: newUser.name,
+        email: newUser.email,
+        password: newUser.password,
+        role: newUser.role || 'user'
+      });
+
+      // Refresh users list
+      const updatedUsers = await usersAPI.getAll();
+      setUsers(updatedUsers);
+      
+      setNewUser({ name: '', email: '', password: '', role: 'user' });
+      alert('Usuario creado exitosamente');
+    } catch (error) {
+      console.error('Error creating user:', error);
+      alert('Error al crear usuario: ' + error.message);
     }
-
-    const user = {
-      id: Date.now(),
-      ...newUser,
-      createdAt: new Date().toISOString().split('T')[0],
-      lastLogin: null,
-      isActive: true
-    };
-
-    const updatedUsers = [...users, user];
-    saveUsers(updatedUsers);
-    setNewUser({ name: '', email: '', password: '', role: 'user' });
-    alert('Usuario creado exitosamente');
   };
 
   const toggleUserStatus = (userId) => {
+    // This functionality might need backend support for user status updates
+    // For now, we'll keep it as frontend-only
     const updatedUsers = users.map(u => 
       u.id === userId ? { ...u, isActive: !u.isActive } : u
     );
-    saveUsers(updatedUsers);
+    setUsers(updatedUsers);
   };
 
-  const deleteUser = (userId) => {
+  const deleteUser = async (userId) => {
     if (window.confirm('¿Está seguro de eliminar este usuario?')) {
-      const updatedUsers = users.filter(u => u.id !== userId);
-      saveUsers(updatedUsers);
+      try {
+        await usersAPI.delete(userId);
+        
+        // Refresh users list
+        const updatedUsers = await usersAPI.getAll();
+        setUsers(updatedUsers);
+        
+        alert('Usuario eliminado exitosamente');
+      } catch (error) {
+        console.error('Error deleting user:', error);
+        alert('Error al eliminar usuario: ' + error.message);
+      }
     }
   };
 
