@@ -762,30 +762,39 @@ function App() {
     const [localEmail, setLocalEmail] = useState('');
     const [localPassword, setLocalPassword] = useState('');
     const [localShowPassword, setLocalShowPassword] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
       e.preventDefault();
-      console.log('Login attempt:', localEmail, localPassword);
-      console.log('Available users:', users);
+      setIsLoading(true);
+      setErrorMessage('');
       
-      const user = users.find(u => u.email === localEmail && u.password === localPassword && u.isActive);
-      
-      if (user) {
-        console.log('User found:', user);
-        setCurrentUser(user);
-        setUserRole(user.role);
+      try {
+        console.log('Login attempt with API:', localEmail, localPassword);
+        
+        // Use backend authentication API
+        const loginResult = await authAPI.login(localEmail, localPassword);
+        
+        console.log('Login successful:', loginResult);
+        
+        setCurrentUser({
+          id: Date.now(), // Generate temporary ID for frontend
+          name: loginResult.name,
+          email: loginResult.email,
+          role: loginResult.role,
+          isActive: true
+        });
+        setUserRole(loginResult.role);
         setIsAuthenticated(true);
         setEmail(localEmail);
         setPassword(localPassword);
         
-        // Update last login
-        const updatedUsers = users.map(u => 
-          u.id === user.id ? { ...u, lastLogin: new Date().toISOString().split('T')[0] } : u
-        );
-        saveUsers(updatedUsers);
-      } else {
-        console.log('Login failed - user not found or inactive');
-        alert('Credenciales incorrectas o usuario inactivo');
+      } catch (error) {
+        console.log('Login failed:', error.message);
+        setErrorMessage('Credenciales incorrectas');
+      } finally {
+        setIsLoading(false);
       }
     };
 
