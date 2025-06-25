@@ -469,27 +469,30 @@ function App() {
     return videos;
   };
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    console.log('Login attempt:', email, password); // Debug log
-    console.log('Available users:', users); // Debug log
     
-    const user = users.find(u => u.email === email && u.password === password && u.isActive);
-    
-    if (user) {
-      console.log('User found:', user); // Debug log
-      setCurrentUser(user);
-      setUserRole(user.role);
+    try {
+      console.log('Login attempt:', email, password); // Debug log
+      
+      // Use backend authentication API
+      const loginResult = await authAPI.login(email, password);
+      
+      console.log('Login successful:', loginResult); // Debug log
+      
+      setCurrentUser({
+        id: Date.now(), // Generate temporary ID for frontend
+        name: loginResult.name,
+        email: loginResult.email,
+        role: loginResult.role,
+        isActive: true
+      });
+      setUserRole(loginResult.role);
       setIsAuthenticated(true);
       
-      // Update last login
-      const updatedUsers = users.map(u => 
-        u.id === user.id ? { ...u, lastLogin: new Date().toISOString().split('T')[0] } : u
-      );
-      saveUsers(updatedUsers);
-    } else {
-      console.log('Login failed - user not found or inactive'); // Debug log
-      alert('Credenciales incorrectas o usuario inactivo');
+    } catch (error) {
+      console.log('Login failed:', error.message); // Debug log
+      alert('Credenciales incorrectas');
     }
   };
 
