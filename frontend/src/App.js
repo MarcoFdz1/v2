@@ -41,6 +41,15 @@ import {
   BookMarked
 } from 'lucide-react';
 import './App.css';
+import { 
+  authAPI, 
+  usersAPI, 
+  categoriesAPI, 
+  videosAPI, 
+  settingsAPI, 
+  bannerVideoAPI, 
+  themeAPI 
+} from './apiService';
 
 // Mock data for real estate training content with enhanced metadata
 const realEstateCategories = [
