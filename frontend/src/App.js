@@ -1704,43 +1704,83 @@ function App() {
   const AdminPanel = () => {
     const [newCategoryName, setNewCategoryName] = useState('');
 
-    const addCategory = () => {
+    const addCategory = async () => {
       if (!newCategoryName.trim()) {
         alert('Por favor ingrese un nombre para la categoría');
         return;
       }
 
-      const newCategory = {
-        id: Date.now(),
-        name: newCategoryName,
-        icon: BookOpen, // Default icon
-        videos: []
-      };
+      try {
+        await categoriesAPI.create({
+          name: newCategoryName.trim(),
+          icon: 'BookOpen' // Default icon
+        });
 
-      const updatedCategories = [...categories, newCategory];
-      setCategories(updatedCategories);
-      localStorage.setItem('netflixRealEstateCategories', JSON.stringify(updatedCategories));
-      setNewCategoryName('');
-      alert('Categoría agregada exitosamente');
-    };
-
-    const editCategory = (category) => {
-      const newName = prompt('Nuevo nombre para la categoría:', category.name);
-      if (newName && newName.trim() && newName !== category.name) {
-        const updatedCategories = categories.map(c => 
-          c.id === category.id ? { ...c, name: newName.trim() } : c
-        );
-        setCategories(updatedCategories);
-        localStorage.setItem('netflixRealEstateCategories', JSON.stringify(updatedCategories));
-        alert('Categoría actualizada exitosamente');
+        // Refresh categories
+        const updatedCategories = await categoriesAPI.getAll();
+        const frontendCategories = updatedCategories.map(category => ({
+          id: parseInt(category.id) || category.id,
+          name: category.name,
+          icon: category.icon,
+          videos: category.videos || []
+        }));
+        setCategories(frontendCategories);
+        
+        setNewCategoryName('');
+        alert('Categoría agregada exitosamente');
+      } catch (error) {
+        console.error('Error adding category:', error);
+        alert('Error al agregar categoría: ' + error.message);
       }
     };
 
-    const deleteCategory = (categoryId) => {
+    const editCategory = async (category) => {
+      const newName = prompt('Nuevo nombre para la categoría:', category.name);
+      if (newName && newName.trim() && newName !== category.name) {
+        try {
+          await categoriesAPI.update(category.id.toString(), {
+            name: newName.trim(),
+            icon: category.icon
+          });
+
+          // Refresh categories
+          const updatedCategories = await categoriesAPI.getAll();
+          const frontendCategories = updatedCategories.map(cat => ({
+            id: parseInt(cat.id) || cat.id,
+            name: cat.name,
+            icon: cat.icon,
+            videos: cat.videos || []
+          }));
+          setCategories(frontendCategories);
+          
+          alert('Categoría actualizada exitosamente');
+        } catch (error) {
+          console.error('Error updating category:', error);
+          alert('Error al actualizar categoría: ' + error.message);
+        }
+      }
+    };
+
+    const deleteCategory = async (categoryId) => {
       if (window.confirm('¿Está seguro de eliminar esta categoría y todos sus videos?')) {
-        const updatedCategories = categories.filter(c => c.id !== categoryId);
-        setCategories(updatedCategories);
-        localStorage.setItem('netflixRealEstateCategories', JSON.stringify(updatedCategories));
+        try {
+          await categoriesAPI.delete(categoryId.toString());
+          
+          // Refresh categories
+          const updatedCategories = await categoriesAPI.getAll();
+          const frontendCategories = updatedCategories.map(category => ({
+            id: parseInt(category.id) || category.id,
+            name: category.name,
+            icon: category.icon,
+            videos: category.videos || []
+          }));
+          setCategories(frontendCategories);
+          
+          alert('Categoría eliminada exitosamente');
+        } catch (error) {
+          console.error('Error deleting category:', error);
+          alert('Error al eliminar categoría: ' + error.message);
+        }
       }
     };
 
