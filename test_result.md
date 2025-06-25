@@ -162,3 +162,5 @@ agent_communication:
     message: "Completed comprehensive testing of all backend API endpoints. All endpoints are working correctly with 100% success rate (27/27 tests passed). The backend successfully handles authentication, user management, category management, video management, settings management, and banner video functionality. Data persistence is confirmed across all operations. The backend is ready for frontend integration."
   - agent: "testing"
     message: "Re-ran all backend API tests to verify continued functionality. All 27 tests are still passing with 100% success rate. The MongoDB backend integration is working perfectly, with proper data persistence, error handling, and data consistency across all endpoints. No issues found with the backend implementation."
+  - agent: "testing"
+    message: "Fixed and tested frontend integration with MongoDB backend. The login functionality now correctly uses the backend API instead of localStorage. Verified API calls are being made to /api/auth/login endpoint. Login with admin credentials works correctly. Only theme preference is stored in localStorage as required. All other data is persisted in MongoDB."
