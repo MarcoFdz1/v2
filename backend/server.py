@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, HTTPException
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -6,7 +6,7 @@ import os
 import logging
 from pathlib import Path
 from pydantic import BaseModel, Field
-from typing import List
+from typing import List, Optional, Dict, Any
 import uuid
 from datetime import datetime
 
@@ -26,7 +26,99 @@ app = FastAPI()
 api_router = APIRouter(prefix="/api")
 
 
-# Define Models
+# Define Models for Real Estate Platform
+class User(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    email: str
+    password: str
+    name: str
+    role: str  # 'admin' or 'user'
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class UserCreate(BaseModel):
+    email: str
+    password: str
+    name: str
+    role: str = 'user'
+
+class UserLogin(BaseModel):
+    email: str
+    password: str
+
+class Video(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    description: str
+    thumbnail: str
+    duration: str
+    youtubeId: str
+    match: str
+    difficulty: str
+    rating: float
+    views: int
+    releaseDate: str
+    categoryId: str
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class VideoCreate(BaseModel):
+    title: str
+    description: str
+    thumbnail: str
+    duration: str
+    youtubeId: str
+    match: str
+    difficulty: str
+    rating: float
+    views: int
+    releaseDate: str
+    categoryId: str
+
+class Category(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    icon: str
+    videos: List[Video] = []
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class CategoryCreate(BaseModel):
+    name: str
+    icon: str
+
+class Settings(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    logoUrl: str = ""
+    companyName: str = "Realty ONE Group Mexico"
+    loginBackgroundUrl: str = ""
+    bannerUrl: str = ""
+    loginTitle: str = "Iniciar Sesión"
+    loginSubtitle: str = "Accede a tu plataforma de capacitación inmobiliaria"
+    theme: str = "dark"
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+class SettingsUpdate(BaseModel):
+    logoUrl: Optional[str] = None
+    companyName: Optional[str] = None
+    loginBackgroundUrl: Optional[str] = None
+    bannerUrl: Optional[str] = None
+    loginTitle: Optional[str] = None
+    loginSubtitle: Optional[str] = None
+    theme: Optional[str] = None
+
+class BannerVideo(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    description: str
+    thumbnail: str
+    youtubeId: str
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class BannerVideoCreate(BaseModel):
+    title: str
+    description: str
+    thumbnail: str
+    youtubeId: str
+
+# Legacy models for compatibility
 class StatusCheck(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     client_name: str
@@ -34,23 +126,6 @@ class StatusCheck(BaseModel):
 
 class StatusCheckCreate(BaseModel):
     client_name: str
-
-# Add your routes to the router instead of directly to app
-@api_router.get("/")
-async def root():
-    return {"message": "Hello World"}
-
-@api_router.post("/status", response_model=StatusCheck)
-async def create_status_check(input: StatusCheckCreate):
-    status_dict = input.dict()
-    status_obj = StatusCheck(**status_dict)
-    _ = await db.status_checks.insert_one(status_obj.dict())
-    return status_obj
-
-@api_router.get("/status", response_model=List[StatusCheck])
-async def get_status_checks():
-    status_checks = await db.status_checks.find().to_list(1000)
-    return [StatusCheck(**status_check) for status_check in status_checks]
 
 # Include the router in the main app
 app.include_router(api_router)
