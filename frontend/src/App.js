@@ -792,6 +792,9 @@ function App() {
         setEmail(localEmail);
         setPassword(localPassword);
         
+        console.log('User role set to:', loginResult.role); // Debug log
+        console.log('IsAuthenticated set to:', true); // Debug log
+        
       } catch (error) {
         console.log('Login failed:', error.message);
         setErrorMessage('Credenciales incorrectas');
