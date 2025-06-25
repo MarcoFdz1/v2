@@ -317,32 +317,63 @@ function App() {
   const controls = useAnimation();
   const userMenuRef = useRef(null);
 
-  // Load saved settings from localStorage
+  // Load data from backend and theme from localStorage
   useEffect(() => {
-    const savedCustomization = localStorage.getItem('netflixRealEstateCustomization');
-    const savedTheme = localStorage.getItem('netflixRealEstateTheme');
-    const savedUsers = localStorage.getItem('netflixRealEstateUsers');
-    const savedCategories = localStorage.getItem('netflixRealEstateCategories');
-    const savedBannerVideo = localStorage.getItem('netflixRealEstateBannerVideo');
-    
-    if (savedCustomization) {
-      setCustomization(JSON.parse(savedCustomization));
-    }
-    if (savedTheme) {
-      setTheme(savedTheme);
-    }
-    if (savedUsers) {
-      setUsers(JSON.parse(savedUsers));
-    }
-    if (savedCategories) {
-      setCategories(JSON.parse(savedCategories));
-    }
-    if (savedBannerVideo) {
-      setBannerVideo(JSON.parse(savedBannerVideo));
-    }
+    const loadData = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Load theme from localStorage (keep this in localStorage)
+        const savedTheme = themeAPI.get();
+        setTheme(savedTheme);
+        
+        // Load data from backend APIs
+        const [settingsData, categoriesData, bannerVideoData] = await Promise.all([
+          settingsAPI.get().catch(() => null),
+          categoriesAPI.getAll().catch(() => []),
+          bannerVideoAPI.get().catch(() => null)
+        ]);
+        
+        if (settingsData) {
+          setCustomization({
+            logoUrl: settingsData.logoUrl || '',
+            companyName: settingsData.companyName || 'Realty ONE Group Mexico',
+            loginBackgroundUrl: settingsData.loginBackgroundUrl || '',
+            bannerUrl: settingsData.bannerUrl || '',
+            loginTitle: settingsData.loginTitle || 'Iniciar Sesión',
+            loginSubtitle: settingsData.loginSubtitle || 'Accede a tu plataforma de capacitación inmobiliaria'
+          });
+        }
+        
+        if (categoriesData && categoriesData.length > 0) {
+          // Convert backend format to frontend format
+          const frontendCategories = categoriesData.map(category => ({
+            id: parseInt(category.id) || category.id,
+            name: category.name,
+            icon: category.icon,
+            videos: category.videos || []
+          }))
+          setCategories(frontendCategories);
+        }
+        
+        if (bannerVideoData) {
+          setBannerVideo(bannerVideoData);
+        }
+        
+        // Load users data for admin
+        const usersData = await usersAPI.getAll().catch(() => []);
+        setUsers(usersData);
+        
+      } catch (error) {
+        console.error('Error loading data from backend:', error);
+        // Fallback to default values if backend fails
+        setCategories(realEstateCategories);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-    // Set loading to false immediately
-    setIsLoading(false);
+    loadData();
   }, []);
 
   // Close user menu when clicking outside
