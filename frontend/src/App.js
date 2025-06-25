@@ -490,6 +490,8 @@ function App() {
       setUserRole(loginResult.role);
       setIsAuthenticated(true);
       
+      console.log('User role set to:', loginResult.role); // Debug log
+      
     } catch (error) {
       console.log('Login failed:', error.message); // Debug log
       alert('Credenciales incorrectas');
