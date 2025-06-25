@@ -876,13 +876,20 @@ function App() {
               </div>
             </div>
             
+            {errorMessage && (
+              <div className="text-red-500 text-sm font-medium error">
+                {errorMessage}
+              </div>
+            )}
+            
             <motion.button
               type="submit"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               className="w-full bg-[#C5A95E] text-black font-semibold py-3 rounded-md hover:bg-[#B8A055] transition duration-200"
+              disabled={isLoading}
             >
-              Iniciar Sesión
+              {isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
             </motion.button>
           </form>
           
