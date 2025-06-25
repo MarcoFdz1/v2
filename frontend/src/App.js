@@ -1454,7 +1454,7 @@ function App() {
       return (match && match[2].length === 11) ? match[2] : null;
     };
 
-    const handleUploadVideo = () => {
+    const handleUploadVideo = async () => {
       if (!newVideo.title || !newVideo.videoUrl) {
         alert('Por favor complete título y URL del video');
         return;
@@ -1466,8 +1466,7 @@ function App() {
         return;
       }
 
-      const video = {
-        id: editingVideo ? editingVideo.id : Date.now(),
+      const videoData = {
         title: newVideo.title,
         description: newVideo.description,
         thumbnail: newVideo.thumbnail || `https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`,
@@ -1477,43 +1476,69 @@ function App() {
         difficulty: newVideo.difficulty,
         rating: editingVideo ? editingVideo.rating : 4.5,
         views: editingVideo ? editingVideo.views : 0,
-        releaseDate: editingVideo ? editingVideo.releaseDate : new Date().toISOString().split('T')[0]
+        releaseDate: editingVideo ? editingVideo.releaseDate : new Date().toISOString().split('T')[0],
+        categoryId: newVideo.categoryId.toString()
       };
 
-      if (editingVideo) {
-        // Update existing video
-        if (editingVideo.categoryId === 'banner') {
-          setBannerVideo(video);
-          localStorage.setItem('netflixRealEstateBannerVideo', JSON.stringify(video));
+      try {
+        if (editingVideo) {
+          // Update existing video
+          if (editingVideo.categoryId === 'banner') {
+            await bannerVideoAPI.set({
+              title: videoData.title,
+              description: videoData.description,
+              thumbnail: videoData.thumbnail,
+              youtubeId: videoData.youtubeId
+            });
+            const updatedBanner = await bannerVideoAPI.get();
+            setBannerVideo(updatedBanner);
+          } else {
+            await videosAPI.update(editingVideo.id, videoData);
+            
+            // Refresh categories
+            const updatedCategories = await categoriesAPI.getAll();
+            const frontendCategories = updatedCategories.map(category => ({
+              id: parseInt(category.id) || category.id,
+              name: category.name,
+              icon: category.icon,
+              videos: category.videos || []
+            }));
+            setCategories(frontendCategories);
+          }
+          alert('Video actualizado exitosamente');
         } else {
-          const updatedCategories = categories.map(category => 
-            category.id === editingVideo.categoryId 
-              ? { ...category, videos: category.videos.map(v => v.id === editingVideo.id ? video : v) }
-              : category
-          );
-          setCategories(updatedCategories);
-          localStorage.setItem('netflixRealEstateCategories', JSON.stringify(updatedCategories));
+          // Create new video
+          if (newVideo.categoryId === 'banner') {
+            await bannerVideoAPI.set({
+              title: videoData.title,
+              description: videoData.description,
+              thumbnail: videoData.thumbnail,
+              youtubeId: videoData.youtubeId
+            });
+            const updatedBanner = await bannerVideoAPI.get();
+            setBannerVideo(updatedBanner);
+          } else {
+            await videosAPI.create(videoData);
+            
+            // Refresh categories
+            const updatedCategories = await categoriesAPI.getAll();
+            const frontendCategories = updatedCategories.map(category => ({
+              id: parseInt(category.id) || category.id,
+              name: category.name,
+              icon: category.icon,
+              videos: category.videos || []
+            }));
+            setCategories(frontendCategories);
+          }
+          alert('Video subido exitosamente');
         }
-        alert('Video actualizado exitosamente');
-      } else {
-        // Create new video
-        if (newVideo.categoryId === 'banner') {
-          setBannerVideo(video);
-          localStorage.setItem('netflixRealEstateBannerVideo', JSON.stringify(video));
-        } else {
-          const updatedCategories = categories.map(category => 
-            category.id === parseInt(newVideo.categoryId) 
-              ? { ...category, videos: [...category.videos, video] }
-              : category
-          );
-          setCategories(updatedCategories);
-          localStorage.setItem('netflixRealEstateCategories', JSON.stringify(updatedCategories));
-        }
-        alert('Video subido exitosamente');
+        
+        setEditingVideo(null);
+        setShowVideoUpload(false);
+      } catch (error) {
+        console.error('Error uploading/updating video:', error);
+        alert('Error al procesar video: ' + error.message);
       }
-      
-      setEditingVideo(null);
-      setShowVideoUpload(false);
     };
 
     const handleCloseModal = () => {
