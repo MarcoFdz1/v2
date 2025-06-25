@@ -127,25 +127,27 @@ class StatusCheck(BaseModel):
 class StatusCheckCreate(BaseModel):
     client_name: str
 
+# Include the router in the main app
+app.include_router(api_router)
 
-# Helper function to initialize default categories
-async def initialize_default_categories():
-    default_categories = [
-        {"id": "1", "name": "Fundamentos Inmobiliarios", "icon": "Home", "videos": []},
-        {"id": "2", "name": "Marketing y Ventas", "icon": "TrendingUp", "videos": []},
-        {"id": "3", "name": "Regulaciones y Ética", "icon": "BookOpen", "videos": []},
-        {"id": "4", "name": "Finanzas y Economía", "icon": "PieChart", "videos": []},
-        {"id": "5", "name": "Tecnología Inmobiliaria", "icon": "Lightbulb", "videos": []},
-        {"id": "6", "name": "Negociación y Cierre", "icon": "Award", "videos": []},
-        {"id": "7", "name": "Desarrollo Personal", "icon": "User", "videos": []},
-        {"id": "8", "name": "Evaluación de Propiedades", "icon": "Building", "videos": []},
-        {"id": "9", "name": "Atención al Cliente", "icon": "Users", "videos": []}
-    ]
-    
-    for category_data in default_categories:
-        category_obj = Category(**category_data, created_at=datetime.utcnow())
-        await db.categories.insert_one(category_obj.dict())
+app.add_middleware(
+    CORSMiddleware,
+    allow_credentials=True,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+@app.on_event("shutdown")
+async def shutdown_db_client():
+    client.close()
 
 # Authentication endpoints
 @api_router.post("/auth/login")
@@ -349,24 +351,20 @@ async def get_status_checks():
     status_checks = await db.status_checks.find().to_list(1000)
     return [StatusCheck(**status_check) for status_check in status_checks]
 
-# Include the router in the main app
-app.include_router(api_router)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_credentials=True,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
-
-@app.on_event("shutdown")
-async def shutdown_db_client():
-    client.close()
+# Helper function to initialize default categories
+async def initialize_default_categories():
+    default_categories = [
+        {"id": "1", "name": "Fundamentos Inmobiliarios", "icon": "Home", "videos": []},
+        {"id": "2", "name": "Marketing y Ventas", "icon": "TrendingUp", "videos": []},
+        {"id": "3", "name": "Regulaciones y Ética", "icon": "BookOpen", "videos": []},
+        {"id": "4", "name": "Finanzas y Economía", "icon": "PieChart", "videos": []},
+        {"id": "5", "name": "Tecnología Inmobiliaria", "icon": "Lightbulb", "videos": []},
+        {"id": "6", "name": "Negociación y Cierre", "icon": "Award", "videos": []},
+        {"id": "7", "name": "Desarrollo Personal", "icon": "User", "videos": []},
+        {"id": "8", "name": "Evaluación de Propiedades", "icon": "Building", "videos": []},
+        {"id": "9", "name": "Atención al Cliente", "icon": "Users", "videos": []}
+    ]
+    
+    for category_data in default_categories:
+        category_obj = Category(**category_data, created_at=datetime.utcnow())
+        await db.categories.insert_one(category_obj.dict())
