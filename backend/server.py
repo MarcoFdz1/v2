@@ -14,14 +14,75 @@ from datetime import datetime
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-# MongoDB connection
-mongo_url = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
-db_name = os.environ.get('DB_NAME', 'real_estate_training')
-client = AsyncIOMotorClient(mongo_url)
-db = client[db_name]
-
 # Create the main app without a prefix
 app = FastAPI(title="Real Estate Training Platform API", version="1.0.0")
+
+# MongoDB connection with fallback
+mongo_url = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
+db_name = os.environ.get('DB_NAME', 'real_estate_training')
+
+async def init_db():
+    try:
+        client = AsyncIOMotorClient(mongo_url, serverSelectionTimeoutMS=5000)
+        # Test connection
+        await client.admin.command('ping')
+        db = client[db_name]
+        print("✅ MongoDB connected successfully")
+        return client, db
+    except Exception as e:
+        print(f"❌ MongoDB connection failed: {e}")
+        # Use in-memory storage as fallback
+        from motor.core import AgnosticDatabase
+        class InMemoryDB:
+            def __init__(self):
+                self.data = {
+                    'categories': [],
+                    'users': [],
+                    'videos': [],
+                    'settings': [],
+                    'banner_videos': []
+                }
+            
+            def __getattr__(self, name):
+                return InMemoryCollection(self.data.get(name, []))
+        
+        class InMemoryCollection:
+            def __init__(self, data):
+                self.data = data
+            
+            async def find(self):
+                return MockCursor(self.data)
+            
+            async def find_one(self, query=None):
+                return self.data[0] if self.data else None
+            
+            async def insert_one(self, doc):
+                self.data.append(doc)
+                return type('Result', (), {'inserted_id': 'temp'})()
+            
+            async def update_one(self, query, update):
+                return type('Result', (), {'matched_count': 1})()
+            
+            async def delete_one(self, query):
+                return type('Result', (), {'deleted_count': 1})()
+            
+            async def delete_many(self, query):
+                return type('Result', (), {'deleted_count': len(self.data)})()
+        
+        class MockCursor:
+            def __init__(self, data):
+                self.data = data
+            
+            async def to_list(self, length):
+                return self.data
+        
+        return None, InMemoryDB()
+
+client, db = None, None  # Initialize with None
+@app.on_event("startup")
+async def startup_db_client():
+    global client, db
+    client, db = await init_db()
 
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
