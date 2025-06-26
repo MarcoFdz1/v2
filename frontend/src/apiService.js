@@ -1,7 +1,7 @@
 // API Service for Real Estate Training Platform
 // This service handles all HTTP requests to the backend
 
-const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || process.env.BACKEND_URL || 'https://one-production-6db5.up.railway.app';
 const API_URL = `${API_BASE_URL}/api`;
 
 // Helper function to handle API responses
