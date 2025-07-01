@@ -302,13 +302,6 @@ async def create_video(video_create: VideoCreate):
     video_dict = video_create.dict()
     video_obj = Video(**video_dict)
     await db.videos.insert_one(video_obj.dict())
-    
-    # Also add to category's videos array
-    await db.categories.update_one(
-        {"id": video_create.categoryId},
-        {"$push": {"videos": video_obj.dict()}}
-    )
-    
     return video_obj
 
 @api_router.put("/videos/{video_id}")
