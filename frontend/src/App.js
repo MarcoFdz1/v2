@@ -807,7 +807,7 @@ function App() {
       <div 
         className={`min-h-screen flex items-center justify-center bg-cover bg-center relative ${theme === 'light' ? 'bg-gray-100' : ''}`}
         style={{
-          backgroundImage: theme === 'dark' ? `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(${customization.loginBackground})` : `linear-gradient(rgba(255,255,255,0.8), rgba(255,255,255,0.8)), url(${customization.loginBackground})`
+          backgroundImage: theme === 'dark' ? `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(${customization.loginBackgroundUrl})` : `linear-gradient(rgba(255,255,255,0.8), rgba(255,255,255,0.8)), url(${customization.loginBackgroundUrl})`
         }}
       >
         <div className={`absolute inset-0 ${theme === 'dark' ? 'bg-black opacity-40' : 'bg-white opacity-60'}`}></div>
