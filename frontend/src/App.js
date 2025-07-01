@@ -817,9 +817,9 @@ function App() {
           className={`${theme === 'dark' ? 'bg-black bg-opacity-80' : 'bg-white bg-opacity-90'} p-8 rounded-lg w-full max-w-md relative z-10 shadow-2xl`}
         >
           <div className="text-center mb-8">
-            {customization.logo ? (
+            {customization.logoUrl ? (
               <img 
-                src={customization.logo} 
+                src={customization.logoUrl} 
                 alt={customization.companyName}
                 className="h-16 mx-auto mb-4 object-contain"
                 onError={(e) => {
