@@ -1892,8 +1892,8 @@ function App() {
                         </label>
                         <input
                           type="text"
-                          defaultValue={customization.loginBackground}
-                          onBlur={(e) => saveCustomization({...customization, loginBackground: e.target.value})}
+                          defaultValue={customization.loginBackgroundUrl}
+                          onBlur={(e) => saveCustomization({...customization, loginBackgroundUrl: e.target.value})}
                           className={`w-full p-2 text-xs ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded border focus:border-[#C5A95E] focus:outline-none transition-colors`}
                           placeholder="https://ejemplo.com/imagen.jpg"
                         />
