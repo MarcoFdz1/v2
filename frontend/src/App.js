@@ -2261,9 +2261,9 @@ function App() {
                 className="cursor-pointer flex items-center space-x-3"
                 onClick={() => setCurrentView('home')}
               >
-                {customization.logo ? (
+                {customization.logoUrl ? (
                   <img 
-                    src={customization.logo} 
+                    src={customization.logoUrl} 
                     alt={customization.companyName}
                     className="h-8 object-contain"
                     onError={(e) => {
