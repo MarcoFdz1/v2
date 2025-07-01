@@ -314,12 +314,6 @@ async def update_video(video_id: str, video_update: VideoCreate):
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Video no encontrado")
     
-    # Update video in category's videos array
-    await db.categories.update_one(
-        {"videos.id": video_id},
-        {"$set": {"videos.$": Video(**video_update.dict()).dict()}}
-    )
-    
     return {"message": "Video actualizado exitosamente"}
 
 @api_router.delete("/videos/{video_id}")
