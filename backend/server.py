@@ -259,6 +259,12 @@ async def get_categories():
         # Initialize with default categories if none exist
         await initialize_default_categories()
         categories = await db.categories.find().to_list(1000)
+    
+    # Get videos for each category
+    for category in categories:
+        category_videos = await db.videos.find({"categoryId": category["id"]}).to_list(1000)
+        category["videos"] = [Video(**video) for video in category_videos]
+    
     return [Category(**category) for category in categories]
 
 @api_router.post("/categories", response_model=Category)
