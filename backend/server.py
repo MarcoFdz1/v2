@@ -323,12 +323,6 @@ async def delete_video(video_id: str):
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Video no encontrado")
     
-    # Remove from all categories
-    await db.categories.update_many(
-        {},
-        {"$pull": {"videos": {"id": video_id}}}
-    )
-    
     return {"message": "Video eliminado exitosamente"}
 
 # Settings management endpoints
