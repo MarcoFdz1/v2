@@ -1888,10 +1888,14 @@ function App() {
                         </label>
                         <input
                           type="text"
-                          defaultValue={customization.logoUrl}
-                          onBlur={(e) => {
-                            alert(`Logo URL changed to: ${e.target.value}`);
-                            saveCustomization({...customization, logoUrl: e.target.value});
+                          value={customization.logoUrl}
+                          onChange={(e) => {
+                            const newCustomization = {...customization, logoUrl: e.target.value};
+                            setCustomization(newCustomization);
+                            clearTimeout(window.logoTimer);
+                            window.logoTimer = setTimeout(() => {
+                              saveCustomization(newCustomization);
+                            }, 1000);
                           }}
                           className={`w-full p-2 text-xs ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded border focus:border-[#C5A95E] focus:outline-none transition-colors`}
                           placeholder="https://ejemplo.com/logo.png"
