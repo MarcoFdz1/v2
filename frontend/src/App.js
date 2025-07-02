@@ -335,14 +335,17 @@ function App() {
         ]);
         
         if (settingsData) {
-          setCustomization({
+          console.log('🔍 Loading settings from backend:', settingsData);
+          const newCustomization = {
             logoUrl: settingsData.logoUrl || '',
             companyName: settingsData.companyName || 'Realty ONE Group Mexico',
             loginBackgroundUrl: settingsData.loginBackgroundUrl || '',
             bannerUrl: settingsData.bannerUrl || '',
             loginTitle: settingsData.loginTitle || 'Iniciar Sesión',
             loginSubtitle: settingsData.loginSubtitle || 'Accede a tu plataforma de capacitación inmobiliaria'
-          });
+          };
+          console.log('✅ Setting customization to:', newCustomization);
+          setCustomization(newCustomization);
         }
         
         if (categoriesData && categoriesData.length > 0) {
