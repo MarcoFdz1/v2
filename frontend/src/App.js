@@ -863,10 +863,6 @@ function App() {
                   onLoad={() => console.log('✅ Logo loaded successfully')}
                 />
               </>
-            ) : (
-                  null
-                }
-              />
             ) : null}
             <h1 className={`text-4xl font-bold text-[#C5A95E] mb-2`} style={{display: customization.logo ? 'none' : 'block'}}>
               {customization.companyName}
