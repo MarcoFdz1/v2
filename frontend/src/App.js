@@ -421,17 +421,21 @@ function App() {
   // Save settings to backend
   const saveCustomization = async (newCustomization) => {
     try {
+      console.log('💾 Saving customization:', newCustomization);
       setCustomization(newCustomization);
-      await settingsAPI.update({
+      const updateData = {
         logoUrl: newCustomization.logoUrl,
         companyName: newCustomization.companyName,
         loginBackgroundUrl: newCustomization.loginBackgroundUrl,
         bannerUrl: newCustomization.bannerUrl,
         loginTitle: newCustomization.loginTitle,
         loginSubtitle: newCustomization.loginSubtitle
-      });
+      };
+      console.log('📡 Sending to backend:', updateData);
+      const result = await settingsAPI.update(updateData);
+      console.log('✅ Backend response:', result);
     } catch (error) {
-      console.error('Error saving customization to backend:', error);
+      console.error('❌ Error saving customization to backend:', error);
       alert('Error al guardar la configuración');
     }
   };
