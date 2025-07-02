@@ -821,11 +821,20 @@ function App() {
         >
           <div className="text-center mb-8">
             {customization.logoUrl ? (
-              <img 
-                src={customization.logoUrl} 
-                alt={customization.companyName}
-                className="h-16 mx-auto mb-4 object-contain"
-                onError={(e) => {
+              <>
+                {console.log('🖼️ Rendering logo:', customization.logoUrl)}
+                <img 
+                  src={customization.logoUrl} 
+                  alt={customization.companyName}
+                  className="h-16 mx-auto mb-4 object-contain"
+                  onError={(e) => {
+                    console.error('❌ Logo failed to load:', customization.logoUrl);
+                    e.target.style.display = 'none';
+                  }}
+                  onLoad={() => console.log('✅ Logo loaded successfully')}
+                />
+              </>
+            ) : (
                   e.target.style.display = 'none';
                   e.target.nextSibling.style.display = 'block';
                 }}
