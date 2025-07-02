@@ -1940,8 +1940,15 @@ function App() {
                         </label>
                         <input
                           type="text"
-                          defaultValue={customization.loginBackgroundUrl}
-                          onBlur={(e) => saveCustomization({...customization, loginBackgroundUrl: e.target.value})}
+                          value={customization.loginBackgroundUrl}
+                          onChange={(e) => {
+                            const newCustomization = {...customization, loginBackgroundUrl: e.target.value};
+                            setCustomization(newCustomization);
+                            clearTimeout(window.backgroundTimer);
+                            window.backgroundTimer = setTimeout(() => {
+                              saveCustomization(newCustomization);
+                            }, 1000);
+                          }}
                           className={`w-full p-2 text-xs ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded border focus:border-[#C5A95E] focus:outline-none transition-colors`}
                           placeholder="https://ejemplo.com/imagen.jpg"
                         />
