@@ -864,9 +864,8 @@ function App() {
                 />
               </>
             ) : (
-                  e.target.style.display = 'none';
-                  e.target.nextSibling.style.display = 'block';
-                }}
+                  null
+                }
               />
             ) : null}
             <h1 className={`text-4xl font-bold text-[#C5A95E] mb-2`} style={{display: customization.logo ? 'none' : 'block'}}>
