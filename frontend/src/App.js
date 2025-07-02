@@ -322,17 +322,34 @@ function App() {
     const loadData = async () => {
       try {
         setIsLoading(true);
+        console.log('🔄 Starting data load...');
         
         // Load theme from localStorage (keep this in localStorage)
         const savedTheme = themeAPI.get();
         setTheme(savedTheme);
+        console.log('🎨 Theme loaded:', savedTheme);
         
         // Load data from backend APIs
+        console.log('📡 Calling backend APIs...');
         const [settingsData, categoriesData, bannerVideoData] = await Promise.all([
-          settingsAPI.get().catch(() => null),
-          categoriesAPI.getAll().catch(() => []),
-          bannerVideoAPI.get().catch(() => null)
+          settingsAPI.get().catch((error) => {
+            console.error('❌ Settings API error:', error);
+            return null;
+          }),
+          categoriesAPI.getAll().catch((error) => {
+            console.error('❌ Categories API error:', error);
+            return [];
+          }),
+          bannerVideoAPI.get().catch((error) => {
+            console.error('❌ Banner API error:', error);
+            return null;
+          })
         ]);
+        
+        console.log('📡 API responses received');
+        console.log('⚙️ Settings data:', settingsData);
+        console.log('📂 Categories data:', categoriesData);
+        console.log('🖼️ Banner data:', bannerVideoData);
         
         if (settingsData) {
           console.log('🔍 Loading settings from backend:', settingsData);
@@ -346,6 +363,13 @@ function App() {
           };
           console.log('✅ Setting customization to:', newCustomization);
           setCustomization(newCustomization);
+          
+          // Force a re-render check
+          setTimeout(() => {
+            console.log('🔍 Checking customization after set:', newCustomization);
+          }, 1000);
+        } else {
+          console.log('❌ No settings data received');
         }
         
         if (categoriesData && categoriesData.length > 0) {
@@ -368,11 +392,12 @@ function App() {
         setUsers(usersData);
         
       } catch (error) {
-        console.error('Error loading data from backend:', error);
+        console.error('💥 Error loading data from backend:', error);
         // Fallback to default values if backend fails
         setCategories(realEstateCategories);
       } finally {
         setIsLoading(false);
+        console.log('✅ Data loading complete');
       }
     };
 
