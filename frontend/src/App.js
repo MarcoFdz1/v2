@@ -312,10 +312,6 @@ function App() {
     loginTitle: 'Iniciar Sesión',
     loginSubtitle: 'Accede a tu plataforma de capacitación inmobiliaria'
   });
-    companyName: 'REALTY ONE GROUP MÉXICO',
-    loginTitle: 'Plataforma de Capacitación Inmobiliaria',
-    loginSubtitle: 'Accede a tu cuenta para continuar con tu formación profesional'
-  });
 
   // Animation controls
   const controls = useAnimation();
