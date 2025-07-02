@@ -305,9 +305,13 @@ function App() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [customization, setCustomization] = useState({
-    logo: 'https://images.unsplash.com/photo-1560472355-536de3962603?w=200&h=80&fit=crop',
-    heroBanner: 'https://images.unsplash.com/photo-1524292691042-82ed9c62673b',
-    loginBackground: 'https://images.unsplash.com/photo-1559458049-9d62fceeb52b',
+    logoUrl: '',
+    companyName: 'Realty ONE Group Mexico',
+    loginBackgroundUrl: '',
+    bannerUrl: '',
+    loginTitle: 'Iniciar Sesión',
+    loginSubtitle: 'Accede a tu plataforma de capacitación inmobiliaria'
+  });
     companyName: 'REALTY ONE GROUP MÉXICO',
     loginTitle: 'Plataforma de Capacitación Inmobiliaria',
     loginSubtitle: 'Accede a tu cuenta para continuar con tu formación profesional'
