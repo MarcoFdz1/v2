@@ -1843,7 +1843,15 @@ function App() {
                 <div className="space-y-4">
                   <div>
                     <h3 className="text-[#C5A95E] font-semibold mb-2 text-sm">Personalización de Marca</h3>
-                    <div className="space-y-2">
+                    
+                    <EmergencyImageFix 
+                      customization={customization}
+                      setCustomization={setCustomization}
+                      saveCustomization={saveCustomization}
+                      theme={theme}
+                    />
+                    
+                    <div className="space-y-2 mt-4">
                       <div>
                         <label className={`block ${theme === 'dark' ? 'text-white' : 'text-gray-900'} text-xs mb-1`}>
                           URL del Logo
