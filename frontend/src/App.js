@@ -1908,8 +1908,6 @@ function App() {
                             }, 1000);
                           }}
                           className={`w-full p-2 text-xs ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded border focus:border-[#C5A95E] focus:outline-none transition-colors`}
-                          className={`w-full p-2 text-xs ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded border focus:border-[#C5A95E] focus:outline-none transition-colors`}
-                          className={`w-full p-2 text-xs ${theme === 'dark' ? 'bg-gray-800 text-white border-gray-700' : 'bg-gray-100 text-gray-900 border-gray-300'} rounded border focus:border-[#C5A95E] focus:outline-none transition-colors`}
                           placeholder="https://ejemplo.com/imagen.jpg"
                         />
                       </div>
