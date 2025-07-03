@@ -50,6 +50,7 @@ import {
   bannerVideoAPI, 
   themeAPI 
 } from './apiService';
+import EmergencyImageFix from './EmergencyImageFix';
 
 // Mock data for real estate training content with enhanced metadata
 const realEstateCategories = [
