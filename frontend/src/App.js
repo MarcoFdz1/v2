@@ -381,25 +381,28 @@ function App() {
     };
   }, []);
 
-  // Save settings to backend
+  // Save settings to backend - SIMPLE VERSION
   const saveCustomization = async (newCustomization) => {
     try {
-      console.log('💾 Saving customization:', newCustomization);
       setCustomization(newCustomization);
-      const updateData = {
-        logoUrl: newCustomization.logoUrl,
-        companyName: newCustomization.companyName,
-        loginBackgroundUrl: newCustomization.loginBackgroundUrl,
-        bannerUrl: newCustomization.bannerUrl,
-        loginTitle: newCustomization.loginTitle,
-        loginSubtitle: newCustomization.loginSubtitle
-      };
-      console.log('📡 Sending to backend:', updateData);
-      const result = await settingsAPI.update(updateData);
-      console.log('✅ Backend response:', result);
+      
+      const response = await fetch('https://one-production-6db5.up.railway.app/api/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          logoUrl: newCustomization.logoUrl,
+          companyName: newCustomization.companyName,
+          loginBackgroundUrl: newCustomization.loginBackgroundUrl,
+          bannerUrl: newCustomization.bannerUrl,
+          loginTitle: newCustomization.loginTitle,
+          loginSubtitle: newCustomization.loginSubtitle
+        })
+      });
+      
+      if (!response.ok) throw new Error('Save failed');
+      
     } catch (error) {
-      console.error('❌ Error saving customization to backend:', error);
-      alert('Error al guardar la configuración');
+      console.error('Save error:', error);
     }
   };
 
