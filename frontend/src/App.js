@@ -320,84 +320,47 @@ function App() {
   // Load data from backend and theme from localStorage
   useEffect(() => {
     const loadData = async () => {
+      setIsLoading(true);
+      
+      // Load theme
+      const savedTheme = localStorage.getItem('netflixRealEstateTheme') || 'dark';
+      setTheme(savedTheme);
+      
       try {
-        setIsLoading(true);
-        console.log('🔄 Starting data load...');
-        
-        // Load theme from localStorage (keep this in localStorage)
-        const savedTheme = themeAPI.get();
-        setTheme(savedTheme);
-        console.log('🎨 Theme loaded:', savedTheme);
-        
-        // Load data from backend APIs
-        console.log('📡 Calling backend APIs...');
-        const [settingsData, categoriesData, bannerVideoData] = await Promise.all([
-          settingsAPI.get().catch((error) => {
-            console.error('❌ Settings API error:', error);
-            return null;
-          }),
-          categoriesAPI.getAll().catch((error) => {
-            console.error('❌ Categories API error:', error);
-            return [];
-          }),
-          bannerVideoAPI.get().catch((error) => {
-            console.error('❌ Banner API error:', error);
-            return null;
-          })
-        ]);
-        
-        console.log('📡 API responses received');
-        console.log('⚙️ Settings data:', settingsData);
-        console.log('📂 Categories data:', categoriesData);
-        console.log('🖼️ Banner data:', bannerVideoData);
+        // Load settings from backend
+        const response = await fetch('https://one-production-6db5.up.railway.app/api/settings');
+        const settingsData = await response.json();
         
         if (settingsData) {
-          console.log('🔍 Loading settings from backend:', settingsData);
-          const newCustomization = {
+          setCustomization({
             logoUrl: settingsData.logoUrl || '',
             companyName: settingsData.companyName || 'Realty ONE Group Mexico',
             loginBackgroundUrl: settingsData.loginBackgroundUrl || '',
             bannerUrl: settingsData.bannerUrl || '',
             loginTitle: settingsData.loginTitle || 'Iniciar Sesión',
             loginSubtitle: settingsData.loginSubtitle || 'Accede a tu plataforma de capacitación inmobiliaria'
-          };
-          console.log('✅ Setting customization to:', newCustomization);
-          setCustomization(newCustomization);
-          
-          // Force a re-render check
-          setTimeout(() => {
-            console.log('🔍 Checking customization after set:', newCustomization);
-          }, 1000);
-        } else {
-          console.log('❌ No settings data received');
+          });
         }
         
+        // Load categories
+        const categoriesResponse = await fetch('https://one-production-6db5.up.railway.app/api/categories');
+        const categoriesData = await categoriesResponse.json();
+        
         if (categoriesData && categoriesData.length > 0) {
-          // Convert backend format to frontend format
           const frontendCategories = categoriesData.map(category => ({
             id: parseInt(category.id) || category.id,
             name: category.name,
             icon: category.icon,
             videos: category.videos || []
-          }))
+          }));
           setCategories(frontendCategories);
         }
         
-        if (bannerVideoData) {
-          setBannerVideo(bannerVideoData);
-        }
-        
-        // Load users data for admin
-        const usersData = await usersAPI.getAll().catch(() => []);
-        setUsers(usersData);
-        
       } catch (error) {
-        console.error('💥 Error loading data from backend:', error);
-        // Fallback to default values if backend fails
+        console.error('Error loading data:', error);
         setCategories(realEstateCategories);
       } finally {
         setIsLoading(false);
-        console.log('✅ Data loading complete');
       }
     };
 
