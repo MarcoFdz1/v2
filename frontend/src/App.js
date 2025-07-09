@@ -64,6 +64,9 @@ function App() {
   const [password, setPassword] = useState('');
   const [theme, setTheme] = useState('dark');
   const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const [users, setUsers] = useState([]);
+  const [showUserModal, setShowUserModal] = useState(false);
+  const [showVideoModal, setShowVideoModal] = useState(false);
   const [customization, setCustomization] = useState({
     logoUrl: '',
     companyName: 'Realty ONE Group Mexico',
@@ -120,6 +123,12 @@ function App() {
             icon: category.icon,
             videos: category.videos || []
           })));
+        }
+
+        // Load users
+        const usersData = await apiCall('/users');
+        if (usersData) {
+          setUsers(usersData);
         }
       } catch (error) {
         console.error('Error loading data:', error);
@@ -185,22 +194,173 @@ function App() {
     localStorage.setItem('netflixRealEstateTheme', newTheme);
   };
 
-  // Image save functions - SIMPLE AND WORKING
+  // ALL SAVE FUNCTIONS WITH BUTTONS - WORKING VERSIONS
   const saveLogoUrl = () => {
-    const logoInput = document.getElementById('logoUrlInput');
-    if (logoInput) {
-      const newCustomization = { ...customization, logoUrl: logoInput.value };
+    const input = document.getElementById('logoUrlInput');
+    if (input) {
+      const newCustomization = { ...customization, logoUrl: input.value };
       saveCustomization(newCustomization);
-      alert('Logo guardado correctamente');
+      alert('✅ Logo guardado correctamente');
     }
   };
 
   const saveBackgroundUrl = () => {
-    const backgroundInput = document.getElementById('backgroundUrlInput');
-    if (backgroundInput) {
-      const newCustomization = { ...customization, loginBackgroundUrl: backgroundInput.value };
+    const input = document.getElementById('backgroundUrlInput');
+    if (input) {
+      const newCustomization = { ...customization, loginBackgroundUrl: input.value };
       saveCustomization(newCustomization);
-      alert('Fondo guardado correctamente');
+      alert('✅ Fondo guardado correctamente');
+    }
+  };
+
+  const saveBannerUrl = () => {
+    const input = document.getElementById('bannerUrlInput');
+    if (input) {
+      const newCustomization = { ...customization, bannerUrl: input.value };
+      saveCustomization(newCustomization);
+      alert('✅ Banner guardado correctamente');
+    }
+  };
+
+  const saveCompanyName = () => {
+    const input = document.getElementById('companyNameInput');
+    if (input) {
+      const newCustomization = { ...customization, companyName: input.value };
+      saveCustomization(newCustomization);
+      alert('✅ Nombre de empresa guardado');
+    }
+  };
+
+  const saveLoginTitle = () => {
+    const input = document.getElementById('loginTitleInput');
+    if (input) {
+      const newCustomization = { ...customization, loginTitle: input.value };
+      saveCustomization(newCustomization);
+      alert('✅ Título del login guardado');
+    }
+  };
+
+  const saveLoginSubtitle = () => {
+    const input = document.getElementById('loginSubtitleInput');
+    if (input) {
+      const newCustomization = { ...customization, loginSubtitle: input.value };
+      saveCustomization(newCustomization);
+      alert('✅ Subtítulo del login guardado');
+    }
+  };
+
+  const createUser = async () => {
+    const nameInput = document.getElementById('newUserName');
+    const emailInput = document.getElementById('newUserEmail');
+    const passwordInput = document.getElementById('newUserPassword');
+    const roleInput = document.getElementById('newUserRole');
+
+    if (!nameInput.value || !emailInput.value || !passwordInput.value) {
+      alert('❌ Por favor complete todos los campos');
+      return;
+    }
+
+    try {
+      await apiCall('/users', {
+        method: 'POST',
+        body: JSON.stringify({
+          name: nameInput.value,
+          email: emailInput.value,
+          password: passwordInput.value,
+          role: roleInput.value
+        })
+      });
+
+      // Refresh users
+      const usersData = await apiCall('/users');
+      setUsers(usersData);
+      
+      // Clear form
+      nameInput.value = '';
+      emailInput.value = '';
+      passwordInput.value = '';
+      roleInput.value = 'user';
+      
+      alert('✅ Usuario creado exitosamente');
+    } catch (error) {
+      alert('❌ Error al crear usuario: ' + error.message);
+    }
+  };
+
+  const deleteUser = async (userId) => {
+    if (window.confirm('¿Está seguro de eliminar este usuario?')) {
+      try {
+        await apiCall(`/users/${userId}`, { method: 'DELETE' });
+        
+        // Refresh users
+        const usersData = await apiCall('/users');
+        setUsers(usersData);
+        
+        alert('✅ Usuario eliminado exitosamente');
+      } catch (error) {
+        alert('❌ Error al eliminar usuario: ' + error.message);
+      }
+    }
+  };
+
+  const uploadVideo = async () => {
+    const titleInput = document.getElementById('videoTitle');
+    const descInput = document.getElementById('videoDescription');
+    const urlInput = document.getElementById('videoUrl');
+    const categoryInput = document.getElementById('videoCategory');
+    const durationInput = document.getElementById('videoDuration');
+
+    if (!titleInput.value || !urlInput.value || !categoryInput.value) {
+      alert('❌ Por favor complete título, URL y categoría');
+      return;
+    }
+
+    // Extract YouTube ID
+    const youtubeId = urlInput.value.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/)?.[1];
+    if (!youtubeId) {
+      alert('❌ Por favor ingrese una URL válida de YouTube');
+      return;
+    }
+
+    try {
+      await apiCall('/videos', {
+        method: 'POST',
+        body: JSON.stringify({
+          title: titleInput.value,
+          description: descInput.value || 'Sin descripción',
+          thumbnail: `https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`,
+          duration: durationInput.value || '45 min',
+          youtubeId: youtubeId,
+          match: '95%',
+          difficulty: 'Intermedio',
+          rating: 4.5,
+          views: 0,
+          releaseDate: new Date().toISOString().split('T')[0],
+          categoryId: categoryInput.value
+        })
+      });
+
+      // Refresh categories
+      const categoriesData = await apiCall('/categories');
+      if (categoriesData && categoriesData.length > 0) {
+        setCategories(categoriesData.map(category => ({
+          id: parseInt(category.id) || category.id,
+          name: category.name,
+          icon: category.icon,
+          videos: category.videos || []
+        })));
+      }
+      
+      // Clear form
+      titleInput.value = '';
+      descInput.value = '';
+      urlInput.value = '';
+      categoryInput.value = '';
+      durationInput.value = '';
+      
+      alert('✅ Video subido exitosamente');
+    } catch (error) {
+      alert('❌ Error al subir video: ' + error.message);
     }
   };
 
@@ -355,9 +515,12 @@ function App() {
                 </div>
 
                 <div className="space-y-6">
-                  {/* Image Settings - WORKING VERSION */}
-                  <div className="p-4 border border-[#C5A95E] rounded">
-                    <h3 className="text-[#C5A95E] font-semibold mb-4">Configuración de Imágenes</h3>
+                  {/* Configuración de Imágenes */}
+                  <div className="p-4 border border-[#C5A95E] rounded-lg">
+                    <h3 className="text-[#C5A95E] font-semibold mb-4 flex items-center">
+                      <Settings className="mr-2" size={18} />
+                      Configuración de Imágenes
+                    </h3>
                     
                     <div className="space-y-4">
                       <div>
@@ -371,8 +534,9 @@ function App() {
                         />
                         <button
                           onClick={saveLogoUrl}
-                          className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                          className="mt-2 w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center justify-center"
                         >
+                          <Save className="mr-2" size={16} />
                           GUARDAR LOGO
                         </button>
                       </div>
@@ -388,45 +552,235 @@ function App() {
                         />
                         <button
                           onClick={saveBackgroundUrl}
-                          className="mt-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+                          className="mt-2 w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors flex items-center justify-center"
                         >
+                          <Save className="mr-2" size={16} />
                           GUARDAR FONDO
+                        </button>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium mb-2">URL de Banner Principal:</label>
+                        <input
+                          id="bannerUrlInput"
+                          type="text"
+                          defaultValue={customization.bannerUrl}
+                          className={`w-full p-2 rounded border ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
+                          placeholder="https://ejemplo.com/banner.jpg"
+                        />
+                        <button
+                          onClick={saveBannerUrl}
+                          className="mt-2 w-full px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors flex items-center justify-center"
+                        >
+                          <Save className="mr-2" size={16} />
+                          GUARDAR BANNER
                         </button>
                       </div>
                     </div>
                   </div>
 
-                  {/* Other Settings */}
-                  <div>
-                    <h3 className="text-[#C5A95E] font-semibold mb-2">Configuración General</h3>
-                    <div className="space-y-3">
+                  {/* Configuración de Textos */}
+                  <div className="p-4 border border-[#C5A95E] rounded-lg">
+                    <h3 className="text-[#C5A95E] font-semibold mb-4 flex items-center">
+                      <Edit className="mr-2" size={18} />
+                      Configuración de Textos
+                    </h3>
+                    
+                    <div className="space-y-4">
                       <div>
-                        <label className="block text-sm mb-1">Nombre de la Empresa:</label>
+                        <label className="block text-sm font-medium mb-2">Nombre de la Empresa:</label>
                         <input
+                          id="companyNameInput"
                           type="text"
                           defaultValue={customization.companyName}
-                          onBlur={(e) => saveCustomization({...customization, companyName: e.target.value})}
-                          className={`w-full p-2 text-sm rounded border ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
+                          className={`w-full p-2 rounded border ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
                         />
+                        <button
+                          onClick={saveCompanyName}
+                          className="mt-2 w-full px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors flex items-center justify-center"
+                        >
+                          <Save className="mr-2" size={16} />
+                          GUARDAR NOMBRE
+                        </button>
                       </div>
+
                       <div>
-                        <label className="block text-sm mb-1">Título del Login:</label>
+                        <label className="block text-sm font-medium mb-2">Título del Login:</label>
                         <input
+                          id="loginTitleInput"
                           type="text"
                           defaultValue={customization.loginTitle}
-                          onBlur={(e) => saveCustomization({...customization, loginTitle: e.target.value})}
-                          className={`w-full p-2 text-sm rounded border ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
+                          className={`w-full p-2 rounded border ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
+                        />
+                        <button
+                          onClick={saveLoginTitle}
+                          className="mt-2 w-full px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-700 transition-colors flex items-center justify-center"
+                        >
+                          <Save className="mr-2" size={16} />
+                          GUARDAR TÍTULO
+                        </button>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Subtítulo del Login:</label>
+                        <input
+                          id="loginSubtitleInput"
+                          type="text"
+                          defaultValue={customization.loginSubtitle}
+                          className={`w-full p-2 rounded border ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
+                        />
+                        <button
+                          onClick={saveLoginSubtitle}
+                          className="mt-2 w-full px-4 py-2 bg-pink-600 text-white rounded hover:bg-pink-700 transition-colors flex items-center justify-center"
+                        >
+                          <Save className="mr-2" size={16} />
+                          GUARDAR SUBTÍTULO
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Gestión de Usuarios */}
+                  <div className="p-4 border border-[#C5A95E] rounded-lg">
+                    <h3 className="text-[#C5A95E] font-semibold mb-4 flex items-center">
+                      <Users className="mr-2" size={18} />
+                      Gestión de Usuarios
+                    </h3>
+                    
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Nombre:</label>
+                        <input
+                          id="newUserName"
+                          type="text"
+                          className={`w-full p-2 rounded border ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
+                          placeholder="Nombre completo"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm mb-1">Subtítulo del Login:</label>
+                        <label className="block text-sm font-medium mb-2">Email:</label>
                         <input
-                          type="text"
-                          defaultValue={customization.loginSubtitle}
-                          onBlur={(e) => saveCustomization({...customization, loginSubtitle: e.target.value})}
-                          className={`w-full p-2 text-sm rounded border ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
+                          id="newUserEmail"
+                          type="email"
+                          className={`w-full p-2 rounded border ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
+                          placeholder="usuario@email.com"
                         />
                       </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Contraseña:</label>
+                        <input
+                          id="newUserPassword"
+                          type="password"
+                          className={`w-full p-2 rounded border ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
+                          placeholder="Contraseña"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Rol:</label>
+                        <select
+                          id="newUserRole"
+                          className={`w-full p-2 rounded border ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
+                        >
+                          <option value="user">Usuario</option>
+                          <option value="admin">Administrador</option>
+                        </select>
+                      </div>
+                      <button
+                        onClick={createUser}
+                        className="w-full px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700 transition-colors flex items-center justify-center"
+                      >
+                        <UserPlus className="mr-2" size={16} />
+                        CREAR USUARIO
+                      </button>
+                    </div>
+
+                    {/* Lista de usuarios */}
+                    <div className="mt-4 space-y-2">
+                      <h4 className="text-sm font-medium">Usuarios existentes:</h4>
+                      <div className="max-h-40 overflow-y-auto">
+                        {users.map((user) => (
+                          <div key={user.id} className={`p-2 rounded ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'} flex justify-between items-center`}>
+                            <div>
+                              <div className="text-sm font-medium">{user.name}</div>
+                              <div className="text-xs text-gray-500">{user.email} ({user.role})</div>
+                            </div>
+                            <button
+                              onClick={() => deleteUser(user.id)}
+                              className="p-1 text-red-500 hover:text-red-700 transition-colors"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Gestión de Videos */}
+                  <div className="p-4 border border-[#C5A95E] rounded-lg">
+                    <h3 className="text-[#C5A95E] font-semibold mb-4 flex items-center">
+                      <Film className="mr-2" size={18} />
+                      Subir Nuevo Video
+                    </h3>
+                    
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Título del Video:</label>
+                        <input
+                          id="videoTitle"
+                          type="text"
+                          className={`w-full p-2 rounded border ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
+                          placeholder="Título del video"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Descripción:</label>
+                        <textarea
+                          id="videoDescription"
+                          className={`w-full p-2 rounded border ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
+                          placeholder="Descripción del video"
+                          rows="3"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-2">URL de YouTube:</label>
+                        <input
+                          id="videoUrl"
+                          type="url"
+                          className={`w-full p-2 rounded border ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
+                          placeholder="https://www.youtube.com/watch?v=..."
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Categoría:</label>
+                        <select
+                          id="videoCategory"
+                          className={`w-full p-2 rounded border ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
+                        >
+                          <option value="">Seleccionar categoría</option>
+                          {categories.map((category) => (
+                            <option key={category.id} value={category.id}>
+                              {category.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Duración:</label>
+                        <input
+                          id="videoDuration"
+                          type="text"
+                          className={`w-full p-2 rounded border ${theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-100 border-gray-300 text-gray-900'}`}
+                          placeholder="45 min"
+                        />
+                      </div>
+                      <button
+                        onClick={uploadVideo}
+                        className="w-full px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors flex items-center justify-center"
+                      >
+                        <Upload className="mr-2" size={16} />
+                        SUBIR VIDEO
+                      </button>
                     </div>
                   </div>
                 </div>
