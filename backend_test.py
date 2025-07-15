@@ -452,6 +452,228 @@ def test_banner_video():
                 "Banner video successfully deleted" if banner_gone else f"Banner video still exists: {response.json()}"
             )
 
+def test_video_progress_tracking():
+    """Test video progress tracking endpoints"""
+    print("\n=== Testing Video Progress Tracking Endpoints ===\n")
+    
+    # Test parameters as specified in the review request
+    user_email = "unbrokerage@realtyonegroupmexico.mx"
+    
+    # First, get existing video IDs to use for testing
+    response = requests.get(f"{API_URL}/videos")
+    videos = response.json() if response.status_code == 200 else []
+    
+    if not videos:
+        # Create a test video if none exist
+        response = requests.get(f"{API_URL}/categories")
+        categories = response.json() if response.status_code == 200 else []
+        
+        if categories:
+            video_data = {
+                "title": "Test Video for Progress Tracking",
+                "description": "Test video description",
+                "thumbnail": "https://example.com/thumbnail.jpg",
+                "duration": "10:30",
+                "youtubeId": "test12345",
+                "match": "high",
+                "difficulty": "medium",
+                "rating": 4.5,
+                "views": 100,
+                "releaseDate": "2023-05-15",
+                "categoryId": categories[0]["id"]
+            }
+            
+            response = requests.post(f"{API_URL}/videos", json=video_data)
+            if response.status_code == 200:
+                videos = [response.json()]
+    
+    if not videos:
+        log_test("Get Videos for Progress Tests", False, "No videos found to use for progress tests")
+        return
+    
+    video_id = videos[0]["id"]
+    
+    # Test 1: POST /api/video-progress - Create/update video progress
+    progress_data = {
+        "user_email": user_email,
+        "video_id": video_id,
+        "progress_percentage": 75.0,
+        "watch_time": 1200,
+        "completed": False
+    }
+    
+    response = requests.post(f"{API_URL}/video-progress", json=progress_data)
+    progress_created = response.status_code == 200 and "id" in response.json()
+    
+    log_test(
+        "Create Video Progress", 
+        progress_created,
+        f"Status: {response.status_code}",
+        response.json() if response.status_code == 200 else response.text
+    )
+    
+    if progress_created:
+        # Test 2: GET /api/video-progress/{user_email} - Get all progress for a user
+        response = requests.get(f"{API_URL}/video-progress/{user_email}")
+        user_progress_retrieved = response.status_code == 200 and isinstance(response.json(), list)
+        
+        log_test(
+            "Get User Video Progress", 
+            user_progress_retrieved,
+            f"Status: {response.status_code}, Found {len(response.json()) if user_progress_retrieved else 0} progress records",
+            f"First record: {response.json()[0] if user_progress_retrieved and response.json() else 'None'}"
+        )
+        
+        # Test 3: GET /api/video-progress/{user_email}/{video_id} - Get specific video progress
+        response = requests.get(f"{API_URL}/video-progress/{user_email}/{video_id}")
+        specific_progress_retrieved = (
+            response.status_code == 200 and 
+            response.json().get("progress_percentage") == 75.0 and
+            response.json().get("watch_time") == 1200
+        )
+        
+        log_test(
+            "Get Specific Video Progress", 
+            specific_progress_retrieved,
+            f"Status: {response.status_code}",
+            response.json() if response.status_code == 200 else response.text
+        )
+        
+        # Test 4: PUT /api/video-progress/{user_email}/{video_id} - Update video progress
+        update_data = {
+            "progress_percentage": 90.0,
+            "watch_time": 1800,
+            "completed": True
+        }
+        
+        response = requests.put(f"{API_URL}/video-progress/{user_email}/{video_id}", json=update_data)
+        progress_updated = response.status_code == 200
+        
+        log_test(
+            "Update Video Progress", 
+            progress_updated,
+            f"Status: {response.status_code}",
+            response.json() if response.status_code == 200 else response.text
+        )
+        
+        if progress_updated:
+            # Verify the update
+            response = requests.get(f"{API_URL}/video-progress/{user_email}/{video_id}")
+            update_verified = (
+                response.status_code == 200 and 
+                response.json().get("progress_percentage") == 90.0 and
+                response.json().get("watch_time") == 1800 and
+                response.json().get("completed") == True
+            )
+            
+            log_test(
+                "Verify Progress Update", 
+                update_verified,
+                f"Status: {response.status_code}",
+                response.json() if response.status_code == 200 else response.text
+            )
+
+def test_dashboard_and_statistics():
+    """Test dashboard and statistics endpoints"""
+    print("\n=== Testing Dashboard and Statistics Endpoints ===\n")
+    
+    user_email = "unbrokerage@realtyonegroupmexico.mx"
+    
+    # Get existing video IDs for testing
+    response = requests.get(f"{API_URL}/videos")
+    videos = response.json() if response.status_code == 200 else []
+    
+    if not videos:
+        log_test("Get Videos for Dashboard Tests", False, "No videos found to use for dashboard tests")
+        return
+    
+    video_id = videos[0]["id"]
+    
+    # Test 5: GET /api/dashboard/{user_email} - Get user dashboard data
+    response = requests.get(f"{API_URL}/dashboard/{user_email}")
+    dashboard_retrieved = (
+        response.status_code == 200 and
+        "user_email" in response.json() and
+        "total_videos_watched" in response.json() and
+        "total_videos_completed" in response.json() and
+        "total_watch_time" in response.json() and
+        "completion_rate" in response.json() and
+        "recent_videos" in response.json() and
+        "progress_by_category" in response.json()
+    )
+    
+    log_test(
+        "Get User Dashboard", 
+        dashboard_retrieved,
+        f"Status: {response.status_code}",
+        {
+            "user_email": response.json().get("user_email"),
+            "total_videos_watched": response.json().get("total_videos_watched"),
+            "total_videos_completed": response.json().get("total_videos_completed"),
+            "completion_rate": response.json().get("completion_rate")
+        } if dashboard_retrieved else response.text
+    )
+    
+    # Test 6: GET /api/video-stats/{video_id} - Get video statistics
+    response = requests.get(f"{API_URL}/video-stats/{video_id}")
+    video_stats_retrieved = (
+        response.status_code == 200 and
+        "total_views" in response.json() and
+        "total_completions" in response.json() and
+        "average_completion_rate" in response.json() and
+        "average_watch_time" in response.json()
+    )
+    
+    log_test(
+        "Get Video Statistics", 
+        video_stats_retrieved,
+        f"Status: {response.status_code}",
+        response.json() if video_stats_retrieved else response.text
+    )
+    
+    # Test 7: GET /api/videos/{video_id}/detailed - Get detailed video with stats
+    response = requests.get(f"{API_URL}/videos/{video_id}/detailed")
+    detailed_video_retrieved = (
+        response.status_code == 200 and
+        "id" in response.json() and
+        "title" in response.json() and
+        "stats" in response.json() and
+        "total_views" in response.json().get("stats", {})
+    )
+    
+    log_test(
+        "Get Detailed Video with Stats", 
+        detailed_video_retrieved,
+        f"Status: {response.status_code}",
+        {
+            "title": response.json().get("title"),
+            "stats": response.json().get("stats")
+        } if detailed_video_retrieved else response.text
+    )
+    
+    # Test 8: GET /api/admin/stats - Get admin statistics
+    response = requests.get(f"{API_URL}/admin/stats")
+    admin_stats_retrieved = (
+        response.status_code == 200 and
+        "overview" in response.json() and
+        "top_videos" in response.json() and
+        "category_stats" in response.json() and
+        "total_users" in response.json().get("overview", {}) and
+        "total_videos" in response.json().get("overview", {}) and
+        "total_categories" in response.json().get("overview", {})
+    )
+    
+    log_test(
+        "Get Admin Statistics", 
+        admin_stats_retrieved,
+        f"Status: {response.status_code}",
+        {
+            "overview": response.json().get("overview"),
+            "top_videos_count": len(response.json().get("top_videos", [])),
+            "category_stats_count": len(response.json().get("category_stats", {}))
+        } if admin_stats_retrieved else response.text
+    )
+
 def print_summary():
     """Print test summary"""
     print("\n" + "="*50)
