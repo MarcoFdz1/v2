@@ -461,7 +461,279 @@ function App() {
               className="fixed inset-0 bg-black bg-opacity-50 z-40"
               onClick={() => setShowAdminPanel(false)}
             />
-            {/* ... rest of admin panel ... */}
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              className={`fixed right-0 top-0 h-full w-96 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} shadow-2xl z-50 overflow-y-auto`}
+            >
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold text-[#C5A95E]">Panel de Administración</h2>
+                  <button
+                    onClick={() => setShowAdminPanel(false)}
+                    className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+                
+                <div className="space-y-6">
+                  {/* Configuration sections - same as main app */}
+                  <div className="border-2 border-[#C5A95E] rounded-lg p-4 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900 dark:to-blue-800">
+                    <h3 className="text-[#C5A95E] font-bold mb-4 flex items-center text-lg">
+                      <Settings className="mr-2" size={20} />
+                      🖼️ CONFIGURACIÓN DE IMÁGENES
+                    </h3>
+                    
+                    <div className="space-y-6">
+                      <div className="bg-white dark:bg-gray-700 p-4 rounded-lg border">
+                        <label className="block text-sm font-bold mb-2 text-blue-600 dark:text-blue-400">🏢 URL del Logo:</label>
+                        <input
+                          id="logoInput"
+                          type="text"
+                          defaultValue={customization.logoUrl}
+                          className="w-full p-3 rounded border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-blue-500 focus:outline-none"
+                          placeholder="https://ejemplo.com/logo.png"
+                        />
+                        <button
+                          onClick={saveLogoUrl}
+                          className="mt-3 w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 flex items-center justify-center font-bold shadow-lg"
+                        >
+                          <Save className="mr-2" size={18} />
+                          💾 GUARDAR LOGO
+                        </button>
+                      </div>
+
+                      <div className="bg-white dark:bg-gray-700 p-4 rounded-lg border">
+                        <label className="block text-sm font-bold mb-2 text-green-600 dark:text-green-400">🌄 URL de Fondo de Login:</label>
+                        <input
+                          id="backgroundInput"
+                          type="text"
+                          defaultValue={customization.loginBackgroundUrl}
+                          className="w-full p-3 rounded border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-green-500 focus:outline-none"
+                          placeholder="https://ejemplo.com/fondo.jpg"
+                        />
+                        <button
+                          onClick={saveBackgroundUrl}
+                          className="mt-3 w-full px-4 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-200 flex items-center justify-center font-bold shadow-lg"
+                        >
+                          <Save className="mr-2" size={18} />
+                          💾 GUARDAR FONDO
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="border-2 border-[#C5A95E] rounded-lg p-4 bg-gradient-to-r from-purple-50 to-purple-100 dark:from-purple-900 dark:to-purple-800">
+                    <h3 className="text-[#C5A95E] font-bold mb-4 flex items-center text-lg">
+                      <Edit className="mr-2" size={20} />
+                      ✏️ CONFIGURACIÓN DE TEXTOS
+                    </h3>
+                    
+                    <div className="space-y-6">
+                      <div className="bg-white dark:bg-gray-700 p-4 rounded-lg border">
+                        <label className="block text-sm font-bold mb-2 text-indigo-600 dark:text-indigo-400">🏢 Nombre de la Empresa:</label>
+                        <input
+                          id="companyInput"
+                          type="text"
+                          defaultValue={customization.companyName}
+                          className="w-full p-3 rounded border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-indigo-500 focus:outline-none"
+                        />
+                        <button
+                          onClick={saveCompanyName}
+                          className="mt-3 w-full px-4 py-3 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-lg hover:from-indigo-700 hover:to-indigo-800 transition-all duration-200 flex items-center justify-center font-bold shadow-lg"
+                        >
+                          <Save className="mr-2" size={18} />
+                          💾 GUARDAR NOMBRE
+                        </button>
+                      </div>
+
+                      <div className="bg-white dark:bg-gray-700 p-4 rounded-lg border">
+                        <label className="block text-sm font-bold mb-2 text-teal-600 dark:text-teal-400">📋 Título del Login:</label>
+                        <input
+                          id="titleInput"
+                          type="text"
+                          defaultValue={customization.loginTitle}
+                          className="w-full p-3 rounded border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-teal-500 focus:outline-none"
+                        />
+                        <button
+                          onClick={saveLoginTitle}
+                          className="mt-3 w-full px-4 py-3 bg-gradient-to-r from-teal-600 to-teal-700 text-white rounded-lg hover:from-teal-700 hover:to-teal-800 transition-all duration-200 flex items-center justify-center font-bold shadow-lg"
+                        >
+                          <Save className="mr-2" size={18} />
+                          💾 GUARDAR TÍTULO
+                        </button>
+                      </div>
+
+                      <div className="bg-white dark:bg-gray-700 p-4 rounded-lg border">
+                        <label className="block text-sm font-bold mb-2 text-pink-600 dark:text-pink-400">📝 Subtítulo del Login:</label>
+                        <input
+                          id="subtitleInput"
+                          type="text"
+                          defaultValue={customization.loginSubtitle}
+                          className="w-full p-3 rounded border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-pink-500 focus:outline-none"
+                        />
+                        <button
+                          onClick={saveLoginSubtitle}
+                          className="mt-3 w-full px-4 py-3 bg-gradient-to-r from-pink-600 to-pink-700 text-white rounded-lg hover:from-pink-700 hover:to-pink-800 transition-all duration-200 flex items-center justify-center font-bold shadow-lg"
+                        >
+                          <Save className="mr-2" size={18} />
+                          💾 GUARDAR SUBTÍTULO
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="border-2 border-[#C5A95E] rounded-lg p-4 bg-gradient-to-r from-emerald-50 to-emerald-100 dark:from-emerald-900 dark:to-emerald-800">
+                    <h3 className="text-[#C5A95E] font-bold mb-4 flex items-center text-lg">
+                      <Users className="mr-2" size={20} />
+                      👥 GESTIÓN DE USUARIOS
+                    </h3>
+                    
+                    <div className="space-y-4">
+                      <div className="bg-white dark:bg-gray-700 p-4 rounded-lg border">
+                        <div className="grid grid-cols-1 gap-4">
+                          <div>
+                            <label className="block text-sm font-bold mb-2 text-emerald-600 dark:text-emerald-400">👤 Nombre:</label>
+                            <input
+                              id="userName"
+                              type="text"
+                              className="w-full p-3 rounded border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-emerald-500 focus:outline-none"
+                              placeholder="Nombre completo"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-bold mb-2 text-emerald-600 dark:text-emerald-400">📧 Email:</label>
+                            <input
+                              id="userEmail"
+                              type="email"
+                              className="w-full p-3 rounded border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-emerald-500 focus:outline-none"
+                              placeholder="usuario@email.com"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-bold mb-2 text-emerald-600 dark:text-emerald-400">🔐 Contraseña:</label>
+                            <input
+                              id="userPassword"
+                              type="password"
+                              className="w-full p-3 rounded border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-emerald-500 focus:outline-none"
+                              placeholder="Contraseña"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-bold mb-2 text-emerald-600 dark:text-emerald-400">🎭 Rol:</label>
+                            <select
+                              id="userRole"
+                              className="w-full p-3 rounded border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-emerald-500 focus:outline-none"
+                            >
+                              <option value="user">Usuario</option>
+                              <option value="admin">Administrador</option>
+                            </select>
+                          </div>
+                        </div>
+                        <button
+                          onClick={createUser}
+                          className="mt-4 w-full px-4 py-3 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-lg hover:from-emerald-700 hover:to-emerald-800 transition-all duration-200 flex items-center justify-center font-bold shadow-lg"
+                        >
+                          <UserPlus className="mr-2" size={18} />
+                          ➕ CREAR USUARIO
+                        </button>
+                      </div>
+
+                      <div className="bg-white dark:bg-gray-700 p-4 rounded-lg border">
+                        <h4 className="text-sm font-bold mb-3 text-emerald-600 dark:text-emerald-400">📋 Usuarios existentes:</h4>
+                        <div className="max-h-48 overflow-y-auto space-y-2">
+                          {users.map((user) => (
+                            <div key={user.id} className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800 border flex justify-between items-center">
+                              <div>
+                                <div className="text-sm font-bold text-gray-900 dark:text-white">{user.name}</div>
+                                <div className="text-xs text-gray-500 dark:text-gray-400">{user.email} ({user.role})</div>
+                              </div>
+                              <button
+                                onClick={() => deleteUser(user.id)}
+                                className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900 rounded-full transition-colors"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="border-2 border-[#C5A95E] rounded-lg p-4 bg-gradient-to-r from-red-50 to-red-100 dark:from-red-900 dark:to-red-800">
+                    <h3 className="text-[#C5A95E] font-bold mb-4 flex items-center text-lg">
+                      <Film className="mr-2" size={20} />
+                      🎬 SUBIR NUEVO VIDEO
+                    </h3>
+                    
+                    <div className="bg-white dark:bg-gray-700 p-4 rounded-lg border">
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-bold mb-2 text-red-600 dark:text-red-400">🎥 Título del Video:</label>
+                          <input
+                            id="videoTitle"
+                            type="text"
+                            className="w-full p-3 rounded border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-red-500 focus:outline-none"
+                            placeholder="Título del video"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-bold mb-2 text-red-600 dark:text-red-400">📝 Descripción:</label>
+                          <textarea
+                            id="videoDescription"
+                            className="w-full p-3 rounded border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-red-500 focus:outline-none"
+                            placeholder="Descripción del video"
+                            rows="3"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-bold mb-2 text-red-600 dark:text-red-400">🔗 URL de YouTube:</label>
+                          <input
+                            id="videoUrl"
+                            type="url"
+                            className="w-full p-3 rounded border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-red-500 focus:outline-none"
+                            placeholder="https://www.youtube.com/watch?v=..."
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-bold mb-2 text-red-600 dark:text-red-400">📂 Categoría:</label>
+                          <select
+                            id="videoCategory"
+                            className="w-full p-3 rounded border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-red-500 focus:outline-none"
+                          >
+                            <option value="">Seleccionar categoría</option>
+                            {categories.map((category) => (
+                              <option key={category.id} value={category.id}>
+                                {category.name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-bold mb-2 text-red-600 dark:text-red-400">⏱️ Duración:</label>
+                          <input
+                            id="videoDuration"
+                            type="text"
+                            className="w-full p-3 rounded border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-red-500 focus:outline-none"
+                            placeholder="45 min"
+                          />
+                        </div>
+                        <button
+                          onClick={uploadVideo}
+                          className="w-full px-4 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 transition-all duration-200 flex items-center justify-center font-bold shadow-lg"
+                        >
+                          <Upload className="mr-2" size={18} />
+                          ⬆️ SUBIR VIDEO
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
           </>
         )}
       </div>
