@@ -146,7 +146,7 @@ function App() {
     if (input && input.value.trim()) {
       saveSettings('logoUrl', input.value.trim());
     } else {
-      alert('Ingrese una URL válida');
+      showWarningToast('Entrada inválida', 'Ingrese una URL válida');
     }
   };
 
@@ -155,7 +155,7 @@ function App() {
     if (input && input.value.trim()) {
       saveSettings('loginBackgroundUrl', input.value.trim());
     } else {
-      alert('Ingrese una URL válida');
+      showWarningToast('Entrada inválida', 'Ingrese una URL válida');
     }
   };
 
@@ -164,7 +164,7 @@ function App() {
     if (input && input.value.trim()) {
       saveSettings('companyName', input.value.trim());
     } else {
-      alert('Ingrese un nombre válido');
+      showWarningToast('Entrada inválida', 'Ingrese un nombre válido');
     }
   };
 
@@ -173,7 +173,7 @@ function App() {
     if (input && input.value.trim()) {
       saveSettings('loginTitle', input.value.trim());
     } else {
-      alert('Ingrese un título válido');
+      showWarningToast('Entrada inválida', 'Ingrese un título válido');
     }
   };
 
@@ -182,7 +182,7 @@ function App() {
     if (input && input.value.trim()) {
       saveSettings('loginSubtitle', input.value.trim());
     } else {
-      alert('Ingrese un subtítulo válido');
+      showWarningToast('Entrada inválida', 'Ingrese un subtítulo válido');
     }
   };
 
