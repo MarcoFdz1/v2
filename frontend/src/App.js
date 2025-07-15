@@ -247,13 +247,13 @@ function App() {
     const duration = document.getElementById('videoDuration').value.trim();
 
     if (!title || !url || !categoryId) {
-      alert('❌ Complete título, URL y categoría');
+      showWarningToast('Campos incompletos', 'Complete título, URL y categoría');
       return;
     }
 
     const youtubeId = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/)?.[1];
     if (!youtubeId) {
-      alert('❌ URL de YouTube inválida');
+      showErrorToast('URL inválida', 'URL de YouTube inválida');
       return;
     }
 
@@ -282,15 +282,25 @@ function App() {
         document.getElementById('videoUrl').value = '';
         document.getElementById('videoCategory').value = '';
         document.getElementById('videoDuration').value = '';
-        alert('✅ Video subido exitosamente');
+        showSuccessToast('Video subido', 'Video subido exitosamente');
         loadInitialData();
       } else {
         const error = await response.json();
-        alert(`❌ Error: ${error.detail || 'Error al subir video'}`);
+        showErrorToast('Error al subir video', error.detail || 'Error al subir video');
       }
     } catch (error) {
-      alert('❌ Error de conexión');
+      showErrorToast('Error de conexión', 'No se pudo conectar con el servidor');
     }
+  };
+
+  const handleVideoClick = (video) => {
+    setSelectedVideo(video);
+    setCurrentView('video-detail');
+  };
+
+  const handleBackFromVideoDetail = () => {
+    setCurrentView('videos');
+    setSelectedVideo(null);
   };
 
   if (!isAuthenticated) {
