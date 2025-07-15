@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import './App.css';
 
-const API_URL = 'https://one-production-6db5.up.railway.app/api';
+const API_URL = process.env.REACT_APP_BACKEND_URL + '/api';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
