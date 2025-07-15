@@ -118,7 +118,7 @@ backend:
         comment: "Created comprehensive backend API with authentication, user management, category management, video management, settings management, and banner video endpoints. All endpoints use '/api' prefix and are connected to MongoDB."
       - working: true
         agent: "testing"
-        comment: "Comprehensive testing of all backend API endpoints completed. All 27 tests passed with 100% success rate. Tested authentication (admin/user login), user management (create/get/delete), category management (get/create/update/delete), video management (create/get/update/delete), settings management (get/update), and banner video functionality (get/set/delete). All endpoints are working correctly and data persistence is confirmed."
+        comment: "Re-tested all backend API endpoints after restart. All 27 tests passed with 100% success rate. Verified all key endpoints requested: Health Check (GET /api/) returns API info, Authentication (POST /api/auth/login) works with admin credentials (unbrokerage@realtyonegroupmexico.mx / OneVision$07), Settings (GET /api/settings) returns current settings, Categories (GET /api/categories) returns 9 default categories, Users (GET /api/users) returns users. All CRUD operations for users, categories, videos, settings, and banner videos are working correctly. MongoDB connection is functional, authentication is working, and data persistence is confirmed across all operations."
 
 frontend:
   - task: "Frontend API Integration"
