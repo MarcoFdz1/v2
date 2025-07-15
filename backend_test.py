@@ -723,6 +723,8 @@ def main():
         test_video_management()
         test_settings_management()
         test_banner_video()
+        test_video_progress_tracking()
+        test_dashboard_and_statistics()
         
         # Print summary
         print_summary()
