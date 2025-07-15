@@ -189,6 +189,62 @@ class StatusCheck(BaseModel):
 class StatusCheckCreate(BaseModel):
     client_name: str
 
+# Video Progress Tracking Models
+class VideoProgress(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_email: str
+    video_id: str
+    progress_percentage: float = 0.0
+    watch_time: int = 0  # in seconds
+    completed: bool = False
+    last_watched: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+class VideoProgressCreate(BaseModel):
+    user_email: str
+    video_id: str
+    progress_percentage: float = 0.0
+    watch_time: int = 0
+    completed: bool = False
+
+class VideoProgressUpdate(BaseModel):
+    progress_percentage: Optional[float] = None
+    watch_time: Optional[int] = None
+    completed: Optional[bool] = None
+
+# Enhanced Video Model with statistics
+class VideoStats(BaseModel):
+    total_views: int = 0
+    total_completions: int = 0
+    average_completion_rate: float = 0.0
+    average_watch_time: int = 0
+
+class VideoWithStats(BaseModel):
+    id: str
+    title: str
+    description: str
+    thumbnail: str
+    duration: str
+    youtubeId: str
+    match: str
+    difficulty: str
+    rating: float
+    views: int
+    releaseDate: str
+    categoryId: str
+    created_at: datetime
+    stats: VideoStats = Field(default_factory=VideoStats)
+
+# User Dashboard Model
+class UserDashboard(BaseModel):
+    user_email: str
+    total_videos_watched: int = 0
+    total_videos_completed: int = 0
+    total_watch_time: int = 0  # in seconds
+    completion_rate: float = 0.0
+    recent_videos: List[VideoWithStats] = []
+    progress_by_category: Dict[str, Dict[str, Any]] = {}
+
 
 # Helper function to initialize default categories
 async def initialize_default_categories():
