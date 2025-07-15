@@ -21,12 +21,16 @@ const API_URL = process.env.REACT_APP_BACKEND_URL + '/api';
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState(null);
+  const [userEmail, setUserEmail] = useState('');
+  const [userName, setUserName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [theme, setTheme] = useState('dark');
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [users, setUsers] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [currentView, setCurrentView] = useState('videos'); // 'videos', 'dashboard', 'video-detail'
+  const [selectedVideo, setSelectedVideo] = useState(null);
   const [customization, setCustomization] = useState({
     logoUrl: '',
     companyName: 'Realty ONE Group Mexico',
