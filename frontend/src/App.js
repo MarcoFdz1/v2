@@ -130,14 +130,14 @@ function App() {
       
       if (response.ok) {
         setCustomization(newSettings);
-        alert(`✅ ${field} guardado correctamente`);
+        showSuccessToast('Configuración guardada', `${field} actualizado correctamente`);
         // Reload data to confirm
         setTimeout(loadInitialData, 500);
       } else {
-        alert('❌ Error al guardar');
+        showErrorToast('Error al guardar', 'No se pudo guardar la configuración');
       }
     } catch (error) {
-      alert('❌ Error de conexión');
+      showErrorToast('Error de conexión', 'Error al conectar con el servidor');
     }
   };
 
