@@ -366,8 +366,110 @@ function App() {
     );
   }
 
+  // Render Video Detail View
+  if (currentView === 'video-detail' && selectedVideo) {
+    return (
+      <div>
+        <ToastContainer />
+        <VideoDetail
+          video={selectedVideo}
+          userEmail={userEmail}
+          onBack={handleBackFromVideoDetail}
+          theme={theme}
+          userRole={userRole}
+        />
+      </div>
+    );
+  }
+
+  // Render Dashboard View
+  if (currentView === 'dashboard') {
+    return (
+      <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'}`}>
+        <ToastContainer />
+        <header className={`${theme === 'dark' ? 'bg-black' : 'bg-white'} p-4 flex justify-between items-center shadow-lg`}>
+          <div className="flex items-center space-x-3">
+            {customization.logoUrl && (
+              <img 
+                src={customization.logoUrl} 
+                alt="Logo"
+                className="h-8 object-contain"
+                onError={(e) => e.target.style.display = 'none'}
+              />
+            )}
+            <h1 className="text-xl font-bold text-[#C5A95E]">{customization.companyName}</h1>
+          </div>
+
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={() => setCurrentView('videos')}
+              className={`p-2 rounded-lg transition-colors ${
+                currentView === 'videos' 
+                  ? 'bg-[#C5A95E] text-white' 
+                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+              }`}
+            >
+              <Home size={20} />
+            </button>
+
+            <button
+              onClick={() => setCurrentView('dashboard')}
+              className={`p-2 rounded-lg transition-colors ${
+                currentView === 'dashboard' 
+                  ? 'bg-[#C5A95E] text-white' 
+                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+              }`}
+            >
+              <BarChart3 size={20} />
+            </button>
+
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-full bg-[#C5A95E] text-white hover:bg-[#B8975A] transition-colors"
+            >
+              {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+            </button>
+
+            {userRole === 'admin' && (
+              <button
+                onClick={() => setShowAdminPanel(!showAdminPanel)}
+                className="p-2 rounded-full bg-[#C5A95E] text-white hover:bg-[#B8975A] transition-colors"
+              >
+                <Settings size={20} />
+              </button>
+            )}
+
+            <button
+              onClick={handleLogout}
+              className="p-2 rounded-full bg-red-600 text-white hover:bg-red-700 transition-colors"
+            >
+              <LogOut size={20} />
+            </button>
+          </div>
+        </header>
+
+        <ProgressDashboard userEmail={userEmail} theme={theme} />
+
+        {/* Admin Panel remains the same */}
+        {showAdminPanel && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black bg-opacity-50 z-40"
+              onClick={() => setShowAdminPanel(false)}
+            />
+            {/* ... rest of admin panel ... */}
+          </>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-900'}`}>
+      <ToastContainer />
       <header className={`${theme === 'dark' ? 'bg-black' : 'bg-white'} p-4 flex justify-between items-center shadow-lg`}>
         <div className="flex items-center space-x-3">
           {customization.logoUrl && (
@@ -382,6 +484,28 @@ function App() {
         </div>
 
         <div className="flex items-center space-x-4">
+          <button
+            onClick={() => setCurrentView('videos')}
+            className={`p-2 rounded-lg transition-colors ${
+              currentView === 'videos' 
+                ? 'bg-[#C5A95E] text-white' 
+                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+            }`}
+          >
+            <Home size={20} />
+          </button>
+
+          <button
+            onClick={() => setCurrentView('dashboard')}
+            className={`p-2 rounded-lg transition-colors ${
+              currentView === 'dashboard' 
+                ? 'bg-[#C5A95E] text-white' 
+                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+            }`}
+          >
+            <BarChart3 size={20} />
+          </button>
+
           <button
             onClick={toggleTheme}
             className="p-2 rounded-full bg-[#C5A95E] text-white hover:bg-[#B8975A] transition-colors"
