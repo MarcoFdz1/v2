@@ -580,6 +580,72 @@ async def delete_banner_video():
     result = await db.banner_videos.delete_many({})
     return {"message": "Banner video eliminado exitosamente"}
 
+# Admin Statistics Endpoint
+@api_router.get("/admin/stats")
+async def get_admin_stats():
+    # Get total counts
+    total_users = len(await db.users.find().to_list(1000))
+    total_videos = len(await db.videos.find().to_list(1000))
+    total_categories = len(await db.categories.find().to_list(1000))
+    
+    # Get progress statistics
+    all_progress = await db.video_progress.find().to_list(10000)
+    total_video_views = len(all_progress)
+    total_completions = sum(1 for p in all_progress if p.get("completed", False))
+    total_watch_time = sum(p.get("watch_time", 0) for p in all_progress)
+    
+    # Get most watched videos
+    video_view_counts = {}
+    for progress in all_progress:
+        video_id = progress["video_id"]
+        video_view_counts[video_id] = video_view_counts.get(video_id, 0) + 1
+    
+    # Get top 5 most watched videos
+    top_videos = sorted(video_view_counts.items(), key=lambda x: x[1], reverse=True)[:5]
+    top_videos_detailed = []
+    
+    for video_id, view_count in top_videos:
+        video = await db.videos.find_one({"id": video_id})
+        if video:
+            stats = await calculate_video_stats(video_id)
+            top_videos_detailed.append({
+                "video": VideoWithStats(**video, stats=stats),
+                "view_count": view_count
+            })
+    
+    # Get completion rate by category
+    categories = await db.categories.find().to_list(1000)
+    category_stats = {}
+    
+    for category in categories:
+        category_videos = await db.videos.find({"categoryId": category["id"]}).to_list(1000)
+        category_video_ids = [v["id"] for v in category_videos]
+        
+        category_progress = [p for p in all_progress if p["video_id"] in category_video_ids]
+        watched_count = len(category_progress)
+        completed_count = sum(1 for p in category_progress if p.get("completed", False))
+        
+        category_stats[category["name"]] = {
+            "total_videos": len(category_videos),
+            "total_views": watched_count,
+            "total_completions": completed_count,
+            "completion_rate": (completed_count / watched_count * 100) if watched_count > 0 else 0
+        }
+    
+    return {
+        "overview": {
+            "total_users": total_users,
+            "total_videos": total_videos,
+            "total_categories": total_categories,
+            "total_video_views": total_video_views,
+            "total_completions": total_completions,
+            "total_watch_time": total_watch_time,
+            "overall_completion_rate": (total_completions / total_video_views * 100) if total_video_views > 0 else 0
+        },
+        "top_videos": top_videos_detailed,
+        "category_stats": category_stats
+    }
+
 # Legacy endpoints for compatibility
 @api_router.get("/")
 async def root():
