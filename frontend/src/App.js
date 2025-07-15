@@ -87,12 +87,15 @@ function App() {
       if (response.ok) {
         const result = await response.json();
         setUserRole(result.role);
+        setUserEmail(result.email);
+        setUserName(result.name);
         setIsAuthenticated(true);
+        showSuccessToast('¡Bienvenido!', `Hola ${result.name}`);
       } else {
-        alert('Credenciales incorrectas');
+        showErrorToast('Error de autenticación', 'Credenciales incorrectas');
       }
     } catch (error) {
-      alert('Error de conexión');
+      showErrorToast('Error de conexión', 'No se pudo conectar con el servidor');
     }
   };
 
