@@ -193,7 +193,7 @@ function App() {
     const role = document.getElementById('userRole').value;
 
     if (!name || !email || !password) {
-      alert('❌ Complete todos los campos');
+      showWarningToast('Campos incompletos', 'Complete todos los campos');
       return;
     }
 
@@ -209,14 +209,14 @@ function App() {
         document.getElementById('userEmail').value = '';
         document.getElementById('userPassword').value = '';
         document.getElementById('userRole').value = 'user';
-        alert('✅ Usuario creado exitosamente');
+        showSuccessToast('Usuario creado', 'Usuario creado exitosamente');
         loadInitialData();
       } else {
         const error = await response.json();
-        alert(`❌ Error: ${error.detail || 'Error al crear usuario'}`);
+        showErrorToast('Error al crear usuario', error.detail || 'Error al crear usuario');
       }
     } catch (error) {
-      alert('❌ Error de conexión');
+      showErrorToast('Error de conexión', 'No se pudo conectar con el servidor');
     }
   };
 
@@ -228,13 +228,13 @@ function App() {
         });
 
         if (response.ok) {
-          alert('✅ Usuario eliminado exitosamente');
+          showSuccessToast('Usuario eliminado', 'Usuario eliminado exitosamente');
           loadInitialData();
         } else {
-          alert('❌ Error al eliminar usuario');
+          showErrorToast('Error al eliminar', 'No se pudo eliminar el usuario');
         }
       } catch (error) {
-        alert('❌ Error de conexión');
+        showErrorToast('Error de conexión', 'No se pudo conectar con el servidor');
       }
     }
   };
