@@ -315,6 +315,7 @@ function App() {
           backgroundPosition: 'center'
         }}
       >
+        <ToastContainer />
         <div className={`${theme === 'dark' ? 'bg-black bg-opacity-80' : 'bg-white bg-opacity-90'} p-8 rounded-lg w-full max-w-md shadow-2xl`}>
           <div className="text-center mb-8">
             {customization.logoUrl && (
