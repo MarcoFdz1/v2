@@ -818,18 +818,41 @@ function App() {
       </AnimatePresence>
 
       <main className="p-6">
-        <h1 className="text-3xl font-bold mb-6">Plataforma de Capacitación Inmobiliaria</h1>
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold mb-2">Plataforma de Capacitación Inmobiliaria</h1>
+          <p className="text-gray-500">Explora nuestro contenido educativo especializado</p>
+        </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Categories Grid with Videos */}
+        <div className="space-y-8">
           {categories.map((category) => (
-            <div
-              key={category.id}
-              className={`p-6 rounded-lg ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} shadow-lg hover:shadow-xl transition-all cursor-pointer`}
-            >
-              <h3 className="text-xl font-semibold text-[#C5A95E] mb-2">{category.name}</h3>
-              <p className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-                {category.videos?.length || 0} videos disponibles
-              </p>
+            <div key={category.id} className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <h2 className="text-2xl font-semibold text-[#C5A95E]">{category.name}</h2>
+                <span className="text-sm text-gray-500">
+                  ({category.videos?.length || 0} videos)
+                </span>
+              </div>
+              
+              {category.videos && category.videos.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {category.videos.map((video) => (
+                    <VideoCard
+                      key={video.id}
+                      video={video}
+                      userEmail={userEmail}
+                      onClick={handleVideoClick}
+                      theme={theme}
+                      showStats={userRole === 'admin'}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className={`text-center py-8 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+                  <Play size={48} className="mx-auto mb-2 opacity-50" />
+                  <p>No hay videos en esta categoría</p>
+                </div>
+              )}
             </div>
           ))}
         </div>
