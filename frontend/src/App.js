@@ -2,8 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Settings, LogOut, Sun, Moon, Save, UserPlus, Upload, 
-  Film, Users, Edit, Trash2, X
+  Film, Users, Edit, Trash2, X, BarChart3, Home, 
+  TrendingUp, Eye, Play
 } from 'lucide-react';
+import VideoCard from './components/VideoCard';
+import VideoDetail from './components/VideoDetail';
+import ProgressDashboard from './components/ProgressDashboard';
+import ToastContainer, { 
+  showSuccessToast, 
+  showErrorToast, 
+  showWarningToast, 
+  showInfoToast 
+} from './components/ToastContainer';
 import './App.css';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL + '/api';
