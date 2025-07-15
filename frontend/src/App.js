@@ -102,9 +102,14 @@ function App() {
   const handleLogout = () => {
     setIsAuthenticated(false);
     setUserRole(null);
+    setUserEmail('');
+    setUserName('');
     setEmail('');
     setPassword('');
     setShowAdminPanel(false);
+    setCurrentView('videos');
+    setSelectedVideo(null);
+    showInfoToast('Sesión cerrada', 'Has cerrado sesión exitosamente');
   };
 
   const toggleTheme = () => {
